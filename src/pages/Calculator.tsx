@@ -99,6 +99,9 @@ const Calculator = () => {
     const annualReturn = parseFloat(values.annualReturnOnInvestment) / 100;
     const withdrawRate = parseFloat(values.withdrawalRate) / 100;
     
+    const workingTaxRate = 0.25; // 25% tax rate during working years
+    const retirementTaxRate = 0.20; // 20% tax rate during retirement
+    
     const primarySS = estimateSocialSecurity(income);
     let totalSS = primarySS;
     
@@ -122,17 +125,20 @@ const Calculator = () => {
     const yearlyBreakdown: YearlyBreakdown[] = [];
     
     while (age < retirementAge) {
+      // During working years, apply 25% tax rate to income
+      const afterTaxSavings = currentSavings * (1 - workingTaxRate);
+      
       yearlyBreakdown.push({
         age,
         portfolioValue: portfolio,
-        contribution: currentSavings,
+        contribution: afterTaxSavings,
         withdrawal: 0,
         isRetired: false,
         inflatedExpenses: currentExpenses,
         socialSecurityIncome: 0,
       });
       
-      portfolio = (portfolio + currentSavings) * (1 + annualReturn);
+      portfolio = (portfolio + afterTaxSavings) * (1 + annualReturn);
       currentExpenses *= (1 + inflationRate);
       currentSavings *= (1 + inflationRate);
       currentSocialSecurity *= (1 + inflationRate);
@@ -141,7 +147,10 @@ const Calculator = () => {
     
     for (let year = 1; year <= (lifeExpectancy - retirementAge); year++) {
       const ssIncome = age >= 67 ? currentSocialSecurity : 0;
-      const withdrawal = Math.max(currentExpenses - ssIncome, 0);
+      const grossWithdrawal = Math.max(currentExpenses - ssIncome, 0);
+      
+      // During retirement, apply 20% tax rate to withdrawals
+      const withdrawal = grossWithdrawal / (1 - retirementTaxRate);
       
       yearlyBreakdown.push({
         age,
@@ -169,8 +178,8 @@ const Calculator = () => {
     return {
       success,
       message: success 
-        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}, accounting for 3% annual inflation and estimated combined Social Security benefits starting at age 67${values.maritalStatus === "married" ? " for both spouses" : ""}.`
-        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans. This calculation includes inflation and Social Security benefits${values.maritalStatus === "married" ? " for both spouses" : ""}.`,
+        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}, accounting for taxes (25% working, 20% retired), 3% annual inflation, and estimated combined Social Security benefits starting at age 67${values.maritalStatus === "married" ? " for both spouses" : ""}.`
+        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans. This calculation includes taxes, inflation, and Social Security benefits${values.maritalStatus === "married" ? " for both spouses" : ""}.`,
       finalPortfolio: success ? portfolio : 0,
       retirementAge,
       yearlyBreakdown,
