@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -37,6 +36,7 @@ interface YearlyBreakdown {
   withdrawal: number;
   isRetired: boolean;
   inflatedExpenses: number;
+  socialSecurityIncome: number;
 }
 
 interface CalculationResult {
@@ -64,6 +64,16 @@ const Calculator = () => {
     },
   });
 
+  const estimateSocialSecurity = (annualIncome: number): number => {
+    const baseIncome = Math.min(annualIncome, 65000);
+    const extraIncome = Math.max(0, annualIncome - 65000);
+    
+    const baseBenefit = baseIncome * 0.4;
+    const extraBenefit = extraIncome * 0.1;
+    
+    return Math.min(baseBenefit + extraBenefit, 45240);
+  };
+
   const calculateRetirement = (values: z.infer<typeof formSchema>): CalculationResult => {
     const currentAge = parseInt(values.age);
     const income = parseFloat(values.currentAnnualIncome);
@@ -75,17 +85,17 @@ const Calculator = () => {
     
     const retirementAge = 65;
     const lifeExpectancy = 95;
-    const ssIncomeAfter67 = 0;
-    const inflationRate = 0.03; // 3% annual inflation
+    const ssIncomeAfter67 = estimateSocialSecurity(income);
+    const inflationRate = 0.03;
     
     let age = currentAge;
     let portfolio = currentPortfolio;
     let success = true;
     let currentExpenses = annualExpenses;
     let currentSavings = annualSavings;
+    let currentSocialSecurity = ssIncomeAfter67;
     const yearlyBreakdown: YearlyBreakdown[] = [];
     
-    // Accumulation phase
     while (age < retirementAge) {
       yearlyBreakdown.push({
         age,
@@ -94,22 +104,19 @@ const Calculator = () => {
         withdrawal: 0,
         isRetired: false,
         inflatedExpenses: currentExpenses,
+        socialSecurityIncome: 0,
       });
       
       portfolio = (portfolio + currentSavings) * (1 + annualReturn);
-      // Adjust for inflation
       currentExpenses *= (1 + inflationRate);
-      currentSavings *= (1 + inflationRate); // Assume savings increase with inflation
+      currentSavings *= (1 + inflationRate);
+      currentSocialSecurity *= (1 + inflationRate);
       age++;
     }
     
-    // Retirement phase
-    const finalPortfolioValue = portfolio;
-    
     for (let year = 1; year <= (lifeExpectancy - retirementAge); year++) {
-      const withdrawal = age < 67 
-        ? currentExpenses 
-        : Math.max(currentExpenses - ssIncomeAfter67, 0);
+      const ssIncome = age >= 67 ? currentSocialSecurity : 0;
+      const withdrawal = Math.max(currentExpenses - ssIncome, 0);
       
       yearlyBreakdown.push({
         age,
@@ -118,6 +125,7 @@ const Calculator = () => {
         withdrawal,
         isRetired: true,
         inflatedExpenses: currentExpenses,
+        socialSecurityIncome: ssIncome,
       });
       
       portfolio = portfolio - withdrawal;
@@ -128,15 +136,16 @@ const Calculator = () => {
       }
       
       portfolio = portfolio * (1 + annualReturn);
-      currentExpenses *= (1 + inflationRate); // Adjust expenses for inflation
+      currentExpenses *= (1 + inflationRate);
+      currentSocialSecurity *= (1 + inflationRate);
       age++;
     }
     
     return {
       success,
       message: success 
-        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}, accounting for 3% annual inflation.`
-        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans. This calculation includes 3% annual inflation.`,
+        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}, accounting for 3% annual inflation and estimated Social Security benefits starting at age 67.`
+        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans. This calculation includes inflation and Social Security benefits.`,
       finalPortfolio: success ? portfolio : 0,
       retirementAge,
       yearlyBreakdown,
@@ -320,6 +329,7 @@ const Calculator = () => {
                       <TableHead>Age</TableHead>
                       <TableHead>Portfolio Value</TableHead>
                       <TableHead>Contribution</TableHead>
+                      <TableHead>SS Income</TableHead>
                       <TableHead>Withdrawal</TableHead>
                       <TableHead>Expenses (Inflated)</TableHead>
                       <TableHead>Status</TableHead>
@@ -336,6 +346,11 @@ const Calculator = () => {
                         </TableCell>
                         <TableCell>
                           ${year.contribution.toLocaleString(undefined, {
+                            maximumFractionDigits: 0,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          ${year.socialSecurityIncome.toLocaleString(undefined, {
                             maximumFractionDigits: 0,
                           })}
                         </TableCell>
