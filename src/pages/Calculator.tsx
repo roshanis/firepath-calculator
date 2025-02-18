@@ -36,6 +36,7 @@ interface YearlyBreakdown {
   contribution: number;
   withdrawal: number;
   isRetired: boolean;
+  inflatedExpenses: number;
 }
 
 interface CalculationResult {
@@ -75,10 +76,13 @@ const Calculator = () => {
     const retirementAge = 65;
     const lifeExpectancy = 95;
     const ssIncomeAfter67 = 0;
+    const inflationRate = 0.03; // 3% annual inflation
     
     let age = currentAge;
     let portfolio = currentPortfolio;
     let success = true;
+    let currentExpenses = annualExpenses;
+    let currentSavings = annualSavings;
     const yearlyBreakdown: YearlyBreakdown[] = [];
     
     // Accumulation phase
@@ -86,12 +90,16 @@ const Calculator = () => {
       yearlyBreakdown.push({
         age,
         portfolioValue: portfolio,
-        contribution: annualSavings,
+        contribution: currentSavings,
         withdrawal: 0,
         isRetired: false,
+        inflatedExpenses: currentExpenses,
       });
       
-      portfolio = (portfolio + annualSavings) * (1 + annualReturn);
+      portfolio = (portfolio + currentSavings) * (1 + annualReturn);
+      // Adjust for inflation
+      currentExpenses *= (1 + inflationRate);
+      currentSavings *= (1 + inflationRate); // Assume savings increase with inflation
       age++;
     }
     
@@ -99,7 +107,9 @@ const Calculator = () => {
     const finalPortfolioValue = portfolio;
     
     for (let year = 1; year <= (lifeExpectancy - retirementAge); year++) {
-      const withdrawal = age < 67 ? annualExpenses : Math.max(annualExpenses - ssIncomeAfter67, 0);
+      const withdrawal = age < 67 
+        ? currentExpenses 
+        : Math.max(currentExpenses - ssIncomeAfter67, 0);
       
       yearlyBreakdown.push({
         age,
@@ -107,6 +117,7 @@ const Calculator = () => {
         contribution: 0,
         withdrawal,
         isRetired: true,
+        inflatedExpenses: currentExpenses,
       });
       
       portfolio = portfolio - withdrawal;
@@ -117,14 +128,15 @@ const Calculator = () => {
       }
       
       portfolio = portfolio * (1 + annualReturn);
+      currentExpenses *= (1 + inflationRate); // Adjust expenses for inflation
       age++;
     }
     
     return {
       success,
       message: success 
-        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}.`
-        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans.`,
+        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}, accounting for 3% annual inflation.`
+        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans. This calculation includes 3% annual inflation.`,
       finalPortfolio: success ? portfolio : 0,
       retirementAge,
       yearlyBreakdown,
@@ -309,6 +321,7 @@ const Calculator = () => {
                       <TableHead>Portfolio Value</TableHead>
                       <TableHead>Contribution</TableHead>
                       <TableHead>Withdrawal</TableHead>
+                      <TableHead>Expenses (Inflated)</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -328,6 +341,11 @@ const Calculator = () => {
                         </TableCell>
                         <TableCell>
                           ${year.withdrawal.toLocaleString(undefined, {
+                            maximumFractionDigits: 0,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          ${year.inflatedExpenses.toLocaleString(undefined, {
                             maximumFractionDigits: 0,
                           })}
                         </TableCell>
