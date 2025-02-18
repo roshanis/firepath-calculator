@@ -228,7 +228,6 @@ const Calculator = () => {
     }
   }
 
-  // Keep the existing return statement but update the Input components for dollar fields
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-12">
       <Card className="max-w-2xl mx-auto p-6 glass">
@@ -505,9 +504,13 @@ const Calculator = () => {
                           })}
                         </TableCell>
                         <TableCell>
-                          ${year.inflatedExpenses.toLocaleString(undefined, {
-                            maximumFractionDigits: 0,
-                          })}
+                          {year.isRetired ? (
+                            `$${year.inflatedExpenses.toLocaleString(undefined, {
+                              maximumFractionDigits: 0,
+                            })}`
+                          ) : (
+                            "-"
+                          )}
                         </TableCell>
                         <TableCell>
                           <span className={year.isRetired ? "text-red-500" : "text-green-500"}>
