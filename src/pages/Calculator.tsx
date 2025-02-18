@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
-import { useState, useEffect } from "react"; // Added useEffect import
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   Table,
@@ -31,6 +30,7 @@ const formSchema = z.object({
   hsaContribution: z.string().optional(),
   spouseAge: z.string().optional(),
   spouseIncome: z.string().optional(),
+  spouseSavings: z.string().optional(),
 });
 
 interface YearlyBreakdown {
@@ -69,6 +69,7 @@ const Calculator = () => {
       hsaContribution: "",
       spouseAge: "",
       spouseIncome: "",
+      spouseSavings: "",
     },
   });
 
@@ -244,6 +245,20 @@ const Calculator = () => {
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="currentAnnualIncome"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{showSpouseFields ? "Combined Annual Income ($)" : "Current Annual Income ($)"}</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder={showSpouseFields ? "150000" : "75000"} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {showSpouseFields && (
                 <>
                   <FormField
@@ -278,26 +293,12 @@ const Calculator = () => {
 
               <FormField
                 control={form.control}
-                name="currentAnnualIncome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Current Annual Income ($)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="75000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="currentAnnualSavings"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Current Annual Savings ($)</FormLabel>
+                    <FormLabel>{showSpouseFields ? "Combined Annual Savings ($)" : "Current Annual Savings ($)"}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="25000" {...field} />
+                      <Input type="number" placeholder={showSpouseFields ? "50000" : "25000"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -309,9 +310,9 @@ const Calculator = () => {
                 name="currentAnnualExpenses"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Current Annual Expenses ($)</FormLabel>
+                    <FormLabel>{showSpouseFields ? "Combined Annual Expenses ($)" : "Current Annual Expenses ($)"}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="50000" {...field} />
+                      <Input type="number" placeholder={showSpouseFields ? "100000" : "50000"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -323,9 +324,9 @@ const Calculator = () => {
                 name="currentPortfolioValue"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Current Portfolio Value ($)</FormLabel>
+                    <FormLabel>{showSpouseFields ? "Combined Portfolio Value ($)" : "Current Portfolio Value ($)"}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="100000" {...field} />
+                      <Input type="number" placeholder={showSpouseFields ? "200000" : "100000"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
