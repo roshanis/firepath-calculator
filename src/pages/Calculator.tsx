@@ -28,6 +28,8 @@ const formSchema = z.object({
   annualReturnOnInvestment: z.string().min(1, "Annual return on investment is required"),
   withdrawalRate: z.string().min(1, "Withdrawal rate is required"),
   hsaContribution: z.string().optional(),
+  spouseAge: z.string().optional(),
+  spouseIncome: z.string().optional(),
 });
 
 interface YearlyBreakdown {
@@ -50,6 +52,7 @@ interface CalculationResult {
 
 const Calculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
+  const [showSpouseFields, setShowSpouseFields] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,8 +66,16 @@ const Calculator = () => {
       annualReturnOnInvestment: "",
       withdrawalRate: "",
       hsaContribution: "",
+      spouseAge: "",
+      spouseIncome: "",
     },
   });
+
+  const maritalStatus = form.watch("maritalStatus");
+  
+  useEffect(() => {
+    setShowSpouseFields(maritalStatus === "married");
+  }, [maritalStatus]);
 
   const estimateSocialSecurity = (annualIncome: number): number => {
     const baseIncome = Math.min(annualIncome, 65000);
@@ -87,9 +98,18 @@ const Calculator = () => {
     const annualReturn = parseFloat(values.annualReturnOnInvestment) / 100;
     const withdrawRate = parseFloat(values.withdrawalRate) / 100;
     
+    const primarySS = estimateSocialSecurity(income);
+    let totalSS = primarySS;
+    
+    if (values.maritalStatus === "married" && values.spouseIncome) {
+      const spouseIncome = parseFloat(values.spouseIncome);
+      const spouseSS = estimateSocialSecurity(spouseIncome);
+      totalSS = primarySS + spouseSS;
+    }
+    
     const retirementAge = 65;
     const lifeExpectancy = 95;
-    const ssIncomeAfter67 = estimateSocialSecurity(income);
+    const ssIncomeAfter67 = totalSS;
     const inflationRate = 0.03;
     
     let age = currentAge;
@@ -148,8 +168,8 @@ const Calculator = () => {
     return {
       success,
       message: success 
-        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}, accounting for 3% annual inflation and estimated Social Security benefits starting at age 67.`
-        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans. This calculation includes inflation and Social Security benefits.`,
+        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}, accounting for 3% annual inflation and estimated combined Social Security benefits starting at age 67${values.maritalStatus === "married" ? " for both spouses" : ""}.`
+        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans. This calculation includes inflation and Social Security benefits${values.maritalStatus === "married" ? " for both spouses" : ""}.`,
       finalPortfolio: success ? portfolio : 0,
       retirementAge,
       yearlyBreakdown,
@@ -213,6 +233,38 @@ const Calculator = () => {
                   </FormItem>
                 )}
               />
+
+              {showSpouseFields && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="spouseAge"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Spouse's Age</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="30" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="spouseIncome"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Spouse's Annual Income ($)</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="75000" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
 
               <FormField
                 control={form.control}
