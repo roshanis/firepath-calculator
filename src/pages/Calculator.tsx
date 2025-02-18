@@ -10,6 +10,14 @@ import { Card } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const formSchema = z.object({
   age: z.string().min(1, "Age is required"),
@@ -22,11 +30,20 @@ const formSchema = z.object({
   withdrawalRate: z.string().min(1, "Withdrawal rate is required"),
 });
 
+interface YearlyBreakdown {
+  age: number;
+  portfolioValue: number;
+  contribution: number;
+  withdrawal: number;
+  isRetired: boolean;
+}
+
 interface CalculationResult {
   success: boolean;
   message: string;
   finalPortfolio: number;
   retirementAge: number;
+  yearlyBreakdown: YearlyBreakdown[];
 }
 
 const Calculator = () => {
@@ -47,39 +64,52 @@ const Calculator = () => {
   });
 
   const calculateRetirement = (values: z.infer<typeof formSchema>): CalculationResult => {
-    // Parse input values
     const currentAge = parseInt(values.age);
     const income = parseFloat(values.currentAnnualIncome);
     const annualSavings = parseFloat(values.currentAnnualSavings);
     const annualExpenses = parseFloat(values.currentAnnualExpenses) || (income - annualSavings);
     const currentPortfolio = parseFloat(values.currentPortfolioValue);
-    const annualReturn = parseFloat(values.annualReturnOnInvestment) / 100; // Convert percentage to decimal
-    const withdrawRate = parseFloat(values.withdrawalRate) / 100; // Convert percentage to decimal
+    const annualReturn = parseFloat(values.annualReturnOnInvestment) / 100;
+    const withdrawRate = parseFloat(values.withdrawalRate) / 100;
     
-    // Set retirement parameters
-    const retirementAge = 65; // Default retirement age
-    const lifeExpectancy = 95; // Plan until age 95
-    const ssIncomeAfter67 = 0; // Assuming no Social Security for conservative estimate
+    const retirementAge = 65;
+    const lifeExpectancy = 95;
+    const ssIncomeAfter67 = 0;
     
-    // Accumulation phase
     let age = currentAge;
     let portfolio = currentPortfolio;
+    let success = true;
+    const yearlyBreakdown: YearlyBreakdown[] = [];
     
+    // Accumulation phase
     while (age < retirementAge) {
+      yearlyBreakdown.push({
+        age,
+        portfolioValue: portfolio,
+        contribution: annualSavings,
+        withdrawal: 0,
+        isRetired: false,
+      });
+      
       portfolio = (portfolio + annualSavings) * (1 + annualReturn);
       age++;
     }
     
-    // Retirement phase simulation
-    let success = true;
+    // Retirement phase
     const finalPortfolioValue = portfolio;
     
     for (let year = 1; year <= (lifeExpectancy - retirementAge); year++) {
-      if (age < 67) {
-        portfolio = portfolio - annualExpenses;
-      } else {
-        portfolio = portfolio - Math.max(annualExpenses - ssIncomeAfter67, 0);
-      }
+      const withdrawal = age < 67 ? annualExpenses : Math.max(annualExpenses - ssIncomeAfter67, 0);
+      
+      yearlyBreakdown.push({
+        age,
+        portfolioValue: portfolio,
+        contribution: 0,
+        withdrawal,
+        isRetired: true,
+      });
+      
+      portfolio = portfolio - withdrawal;
       
       if (portfolio < 0) {
         success = false;
@@ -97,6 +127,7 @@ const Calculator = () => {
         : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans.`,
       finalPortfolio: success ? portfolio : 0,
       retirementAge,
+      yearlyBreakdown,
     };
   };
 
@@ -251,21 +282,67 @@ const Calculator = () => {
         </Form>
 
         {result && (
-          <div className={`mt-8 p-4 rounded-lg ${
-            result.success ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"
-          }`}>
-            <h2 className="text-lg font-semibold mb-2">
-              {result.success ? "Retirement Plan Analysis" : "Warning"}
-            </h2>
-            <p>{result.message}</p>
-            {result.success && (
-              <p className="mt-2">
-                Estimated final portfolio value: ${result.finalPortfolio.toLocaleString(undefined, {
-                  maximumFractionDigits: 0,
-                })}
-              </p>
-            )}
-          </div>
+          <>
+            <div className={`mt-8 p-4 rounded-lg ${
+              result.success ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"
+            }`}>
+              <h2 className="text-lg font-semibold mb-2">
+                {result.success ? "Retirement Plan Analysis" : "Warning"}
+              </h2>
+              <p>{result.message}</p>
+              {result.success && (
+                <p className="mt-2">
+                  Estimated final portfolio value: ${result.finalPortfolio.toLocaleString(undefined, {
+                    maximumFractionDigits: 0,
+                  })}
+                </p>
+              )}
+            </div>
+
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold mb-4">Yearly Breakdown</h3>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Age</TableHead>
+                      <TableHead>Portfolio Value</TableHead>
+                      <TableHead>Contribution</TableHead>
+                      <TableHead>Withdrawal</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {result.yearlyBreakdown.map((year, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{year.age}</TableCell>
+                        <TableCell>
+                          ${year.portfolioValue.toLocaleString(undefined, {
+                            maximumFractionDigits: 0,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          ${year.contribution.toLocaleString(undefined, {
+                            maximumFractionDigits: 0,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          ${year.withdrawal.toLocaleString(undefined, {
+                            maximumFractionDigits: 0,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          <span className={year.isRetired ? "text-red-500" : "text-green-500"}>
+                            {year.isRetired ? "Retired" : "Working"}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </>
         )}
       </Card>
     </div>
