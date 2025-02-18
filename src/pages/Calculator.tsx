@@ -277,11 +277,11 @@ const Calculator = () => {
                 name="currentAnnualIncome"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{showSpouseFields ? "Combined Annual Income ($)" : "Current Annual Income ($)"}</FormLabel>
+                    <FormLabel>{showSpouseFields ? "Your Annual Income ($)" : "Current Annual Income ($)"}</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder={showSpouseFields ? "150,000" : "75,000"}
+                        placeholder={showSpouseFields ? "75,000" : "75,000"}
                         {...field}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
