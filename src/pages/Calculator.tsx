@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   age: z.string().min(1, "Age is required"),
@@ -20,7 +22,16 @@ const formSchema = z.object({
   withdrawalRate: z.string().min(1, "Withdrawal rate is required"),
 });
 
+interface CalculationResult {
+  success: boolean;
+  message: string;
+  finalPortfolio: number;
+  retirementAge: number;
+}
+
 const Calculator = () => {
+  const [result, setResult] = useState<CalculationResult | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,8 +46,72 @@ const Calculator = () => {
     },
   });
 
+  const calculateRetirement = (values: z.infer<typeof formSchema>): CalculationResult => {
+    // Parse input values
+    const currentAge = parseInt(values.age);
+    const income = parseFloat(values.currentAnnualIncome);
+    const annualSavings = parseFloat(values.currentAnnualSavings);
+    const annualExpenses = parseFloat(values.currentAnnualExpenses) || (income - annualSavings);
+    const currentPortfolio = parseFloat(values.currentPortfolioValue);
+    const annualReturn = parseFloat(values.annualReturnOnInvestment) / 100; // Convert percentage to decimal
+    const withdrawRate = parseFloat(values.withdrawalRate) / 100; // Convert percentage to decimal
+    
+    // Set retirement parameters
+    const retirementAge = 65; // Default retirement age
+    const lifeExpectancy = 95; // Plan until age 95
+    const ssIncomeAfter67 = 0; // Assuming no Social Security for conservative estimate
+    
+    // Accumulation phase
+    let age = currentAge;
+    let portfolio = currentPortfolio;
+    
+    while (age < retirementAge) {
+      portfolio = (portfolio + annualSavings) * (1 + annualReturn);
+      age++;
+    }
+    
+    // Retirement phase simulation
+    let success = true;
+    const finalPortfolioValue = portfolio;
+    
+    for (let year = 1; year <= (lifeExpectancy - retirementAge); year++) {
+      if (age < 67) {
+        portfolio = portfolio - annualExpenses;
+      } else {
+        portfolio = portfolio - Math.max(annualExpenses - ssIncomeAfter67, 0);
+      }
+      
+      if (portfolio < 0) {
+        success = false;
+        break;
+      }
+      
+      portfolio = portfolio * (1 + annualReturn);
+      age++;
+    }
+    
+    return {
+      success,
+      message: success 
+        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}.`
+        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans.`,
+      finalPortfolio: success ? portfolio : 0,
+      retirementAge,
+    };
+  };
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    try {
+      const calculationResult = calculateRetirement(values);
+      setResult(calculationResult);
+      toast(calculationResult.success ? "Success" : "Warning", {
+        description: calculationResult.message,
+      });
+    } catch (error) {
+      toast("Error", {
+        description: "There was an error calculating your retirement plan. Please check your inputs.",
+      });
+    }
   }
 
   return (
@@ -174,6 +249,24 @@ const Calculator = () => {
             </Button>
           </form>
         </Form>
+
+        {result && (
+          <div className={`mt-8 p-4 rounded-lg ${
+            result.success ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"
+          }`}>
+            <h2 className="text-lg font-semibold mb-2">
+              {result.success ? "Retirement Plan Analysis" : "Warning"}
+            </h2>
+            <p>{result.message}</p>
+            {result.success && (
+              <p className="mt-2">
+                Estimated final portfolio value: ${result.finalPortfolio.toLocaleString(undefined, {
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+            )}
+          </div>
+        )}
       </Card>
     </div>
   );
