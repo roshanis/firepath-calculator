@@ -55,6 +55,21 @@ const Calculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [showSpouseFields, setShowSpouseFields] = useState(false);
 
+  const formatCurrency = (value: string) => {
+    // Remove any existing commas first
+    const number = value.replace(/,/g, '');
+    // Check if it's a valid number
+    if (!isNaN(Number(number))) {
+      return Number(number).toLocaleString('en-US');
+    }
+    return value;
+  };
+
+  const parseCurrency = (value: string) => {
+    // Remove commas before processing
+    return value.replace(/,/g, '');
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -189,7 +204,19 @@ const Calculator = () => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const calculationResult = calculateRetirement(values);
+      // Parse the values to remove commas before calculation
+      const processedValues = {
+        ...values,
+        currentAnnualIncome: parseCurrency(values.currentAnnualIncome),
+        currentAnnualSavings: parseCurrency(values.currentAnnualSavings),
+        currentAnnualExpenses: parseCurrency(values.currentAnnualExpenses),
+        currentPortfolioValue: parseCurrency(values.currentPortfolioValue),
+        hsaContribution: values.hsaContribution ? parseCurrency(values.hsaContribution) : "",
+        spouseIncome: values.spouseIncome ? parseCurrency(values.spouseIncome) : "",
+        spouseSavings: values.spouseSavings ? parseCurrency(values.spouseSavings) : "",
+      };
+      
+      const calculationResult = calculateRetirement(processedValues);
       setResult(calculationResult);
       toast(calculationResult.success ? "Success" : "Warning", {
         description: calculationResult.message,
@@ -201,6 +228,7 @@ const Calculator = () => {
     }
   }
 
+  // Keep the existing return statement but update the Input components for dollar fields
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-12">
       <Card className="max-w-2xl mx-auto p-6 glass">
@@ -252,7 +280,13 @@ const Calculator = () => {
                   <FormItem>
                     <FormLabel>{showSpouseFields ? "Combined Annual Income ($)" : "Current Annual Income ($)"}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder={showSpouseFields ? "150000" : "75000"} {...field} />
+                      <Input
+                        type="text"
+                        placeholder={showSpouseFields ? "150,000" : "75,000"}
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -282,7 +316,13 @@ const Calculator = () => {
                       <FormItem>
                         <FormLabel>Spouse's Annual Income ($)</FormLabel>
                         <FormControl>
-                          <Input type="number" placeholder="75000" {...field} />
+                          <Input
+                            type="text"
+                            placeholder="75,000"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -298,7 +338,13 @@ const Calculator = () => {
                   <FormItem>
                     <FormLabel>{showSpouseFields ? "Combined Annual Savings ($)" : "Current Annual Savings ($)"}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder={showSpouseFields ? "50000" : "25000"} {...field} />
+                      <Input
+                        type="text"
+                        placeholder={showSpouseFields ? "50,000" : "25,000"}
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -312,7 +358,13 @@ const Calculator = () => {
                   <FormItem>
                     <FormLabel>{showSpouseFields ? "Combined Annual Expenses ($)" : "Current Annual Expenses ($)"}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder={showSpouseFields ? "100000" : "50000"} {...field} />
+                      <Input
+                        type="text"
+                        placeholder={showSpouseFields ? "100,000" : "50,000"}
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -326,7 +378,13 @@ const Calculator = () => {
                   <FormItem>
                     <FormLabel>{showSpouseFields ? "Combined Portfolio Value ($)" : "Current Portfolio Value ($)"}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder={showSpouseFields ? "200000" : "100000"} {...field} />
+                      <Input
+                        type="text"
+                        placeholder={showSpouseFields ? "200,000" : "100,000"}
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -369,9 +427,11 @@ const Calculator = () => {
                     <FormLabel>Annual HSA Contribution ($) - Optional</FormLabel>
                     <FormControl>
                       <Input 
-                        type="number" 
-                        placeholder="3850" 
-                        {...field} 
+                        type="text"
+                        placeholder="3,850" 
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
