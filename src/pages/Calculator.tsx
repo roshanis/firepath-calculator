@@ -27,6 +27,7 @@ const formSchema = z.object({
   currentPortfolioValue: z.string().min(1, "Current portfolio value is required"),
   annualReturnOnInvestment: z.string().min(1, "Annual return on investment is required"),
   withdrawalRate: z.string().min(1, "Withdrawal rate is required"),
+  hsaContribution: z.string().optional(),
 });
 
 interface YearlyBreakdown {
@@ -61,6 +62,7 @@ const Calculator = () => {
       currentPortfolioValue: "",
       annualReturnOnInvestment: "",
       withdrawalRate: "",
+      hsaContribution: "",
     },
   });
 
@@ -78,7 +80,9 @@ const Calculator = () => {
     const currentAge = parseInt(values.age);
     const income = parseFloat(values.currentAnnualIncome);
     const annualSavings = parseFloat(values.currentAnnualSavings);
-    const annualExpenses = parseFloat(values.currentAnnualExpenses) || (income - annualSavings);
+    const hsaContribution = parseFloat(values.hsaContribution || "0");
+    const totalAnnualSavings = annualSavings + hsaContribution;
+    const annualExpenses = parseFloat(values.currentAnnualExpenses) || (income - totalAnnualSavings);
     const currentPortfolio = parseFloat(values.currentPortfolioValue);
     const annualReturn = parseFloat(values.annualReturnOnInvestment) / 100;
     const withdrawRate = parseFloat(values.withdrawalRate) / 100;
@@ -92,7 +96,7 @@ const Calculator = () => {
     let portfolio = currentPortfolio;
     let success = true;
     let currentExpenses = annualExpenses;
-    let currentSavings = annualSavings;
+    let currentSavings = totalAnnualSavings;
     let currentSocialSecurity = ssIncomeAfter67;
     const yearlyBreakdown: YearlyBreakdown[] = [];
     
@@ -288,6 +292,24 @@ const Calculator = () => {
                     <FormLabel>Withdrawal Rate (%)</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="4" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="hsaContribution"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Annual HSA Contribution ($) - Optional</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="3850" 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
