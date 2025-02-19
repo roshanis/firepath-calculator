@@ -94,13 +94,7 @@ const Calculator = () => {
   }, [maritalStatus]);
 
   const estimateSocialSecurity = (annualIncome: number): number => {
-    const baseIncome = Math.min(annualIncome, 65000);
-    const extraIncome = Math.max(0, annualIncome - 65000);
-    
-    const baseBenefit = baseIncome * 0.4;
-    const extraBenefit = extraIncome * 0.1;
-    
-    return Math.min(baseBenefit + extraBenefit, 45240);
+    return 23712; // Fixed social security payment of $1,976 per month
   };
 
   const calculateRetirement = (values: z.infer<typeof formSchema>): CalculationResult => {
@@ -126,7 +120,7 @@ const Calculator = () => {
       totalSS = primarySS + spouseSS;
     }
     
-    const retirementAge = 65;
+    const retirementAge = 67; // Updated retirement age to 67
     const lifeExpectancy = 95;
     const ssIncomeAfter67 = totalSS;
     const inflationRate = 0.03;
@@ -187,8 +181,8 @@ const Calculator = () => {
     return {
       success,
       message: success 
-        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}, accounting for taxes (25% working, 20% retired), 3% annual inflation, and estimated combined Social Security benefits starting at age 67${values.maritalStatus === "married" ? " for both spouses" : ""}.`
-        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans. This calculation includes taxes, inflation, and Social Security benefits${values.maritalStatus === "married" ? " for both spouses" : ""}.`,
+        ? `You can retire successfully at age ${retirementAge}. Your portfolio will last until age ${lifeExpectancy}, accounting for taxes (25% working, 20% retired), 3% annual inflation, and fixed Social Security benefits of $1,976/month${values.maritalStatus === "married" ? " for both spouses" : ""} starting at age 67.`
+        : `Your portfolio may be depleted before age ${lifeExpectancy}. Consider increasing savings or adjusting retirement plans. This calculation includes taxes, inflation, and Social Security benefits of $1,976/month${values.maritalStatus === "married" ? " for both spouses" : ""}.`,
       finalPortfolio: success ? portfolio : 0,
       retirementAge,
       yearlyBreakdown,
