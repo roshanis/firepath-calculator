@@ -14,7 +14,9 @@ export const parseCurrency = (value: string) => {
 };
 
 const estimateSocialSecurity = (annualIncome: number): number => {
-  return 23712; // Fixed social security payment of $1,976 per month
+  const monthlyAmount = 1976; // Fixed amount of $1,976 per month
+  const annualAmount = monthlyAmount * 12;
+  return annualAmount;
 };
 
 export const calculateRetirement = (values: CalculatorFormValues): CalculationResult => {
@@ -67,9 +69,11 @@ export const calculateRetirement = (values: CalculatorFormValues): CalculationRe
     portfolio = (portfolio + currentSavings) * (1 + annualReturn);
     currentExpenses *= (1 + inflationRate);
     currentSavings *= (1 + inflationRate);
-    currentSocialSecurity *= (1 + inflationRate);
     age++;
   }
+  
+  // Reset currentSocialSecurity at retirement age to account for inflation up to that point
+  currentSocialSecurity = ssIncomeAfter67 * Math.pow(1 + inflationRate, retirementAge - currentAge);
   
   for (let year = 1; year <= (lifeExpectancy - retirementAge); year++) {
     const ssIncome = age >= 67 ? currentSocialSecurity : 0;
