@@ -72,11 +72,8 @@ export const calculateRetirement = (values: CalculatorFormValues): CalculationRe
     age++;
   }
   
-  // Reset currentSocialSecurity at retirement age to account for inflation up to that point
-  currentSocialSecurity = ssIncomeAfter67 * Math.pow(1 + inflationRate, retirementAge - currentAge);
-  
   for (let year = 1; year <= (lifeExpectancy - retirementAge); year++) {
-    const ssIncome = age >= 67 ? currentSocialSecurity : 0;
+    const ssIncome = age >= 67 ? totalSS : 0;
     const grossWithdrawal = Math.max(currentExpenses - ssIncome, 0);
     
     yearlyBreakdown.push({
@@ -98,7 +95,6 @@ export const calculateRetirement = (values: CalculatorFormValues): CalculationRe
     
     portfolio = portfolio * (1 + annualReturn);
     currentExpenses *= (1 + inflationRate);
-    currentSocialSecurity *= (1 + inflationRate);
     age++;
   }
   
