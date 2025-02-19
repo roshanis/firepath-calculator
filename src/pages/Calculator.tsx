@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const formSchema = z.object({
   age: z.string().min(1, "Age is required"),
@@ -54,11 +55,10 @@ interface CalculationResult {
 const Calculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [showSpouseFields, setShowSpouseFields] = useState(false);
+  const [showDetailedBreakdown, setShowDetailedBreakdown] = useState(false);
 
   const formatCurrency = (value: string) => {
-    // Remove any existing commas first
     const number = value.replace(/,/g, '');
-    // Check if it's a valid number
     if (!isNaN(Number(number))) {
       return Number(number).toLocaleString('en-US');
     }
@@ -66,7 +66,6 @@ const Calculator = () => {
   };
 
   const parseCurrency = (value: string) => {
-    // Remove commas before processing
     return value.replace(/,/g, '');
   };
 
@@ -141,20 +140,17 @@ const Calculator = () => {
     const yearlyBreakdown: YearlyBreakdown[] = [];
     
     while (age < retirementAge) {
-      // During working years, apply 25% tax rate to income
-      const afterTaxSavings = currentSavings * (1 - workingTaxRate);
-      
       yearlyBreakdown.push({
         age,
         portfolioValue: portfolio,
-        contribution: afterTaxSavings,
+        contribution: currentSavings,
         withdrawal: 0,
         isRetired: false,
         inflatedExpenses: currentExpenses,
         socialSecurityIncome: 0,
       });
       
-      portfolio = (portfolio + afterTaxSavings) * (1 + annualReturn);
+      portfolio = (portfolio + currentSavings) * (1 + annualReturn);
       currentExpenses *= (1 + inflationRate);
       currentSavings *= (1 + inflationRate);
       currentSocialSecurity *= (1 + inflationRate);
@@ -165,20 +161,17 @@ const Calculator = () => {
       const ssIncome = age >= 67 ? currentSocialSecurity : 0;
       const grossWithdrawal = Math.max(currentExpenses - ssIncome, 0);
       
-      // During retirement, apply 20% tax rate to withdrawals
-      const withdrawal = grossWithdrawal / (1 - retirementTaxRate);
-      
       yearlyBreakdown.push({
         age,
         portfolioValue: portfolio,
         contribution: 0,
-        withdrawal,
+        withdrawal: grossWithdrawal,
         isRetired: true,
         inflatedExpenses: currentExpenses,
         socialSecurityIncome: ssIncome,
       });
       
-      portfolio = portfolio - withdrawal;
+      portfolio = portfolio - grossWithdrawal;
       
       if (portfolio < 0) {
         success = false;
@@ -204,7 +197,6 @@ const Calculator = () => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // Parse the values to remove commas before calculation
       const processedValues = {
         ...values,
         currentAnnualIncome: parseCurrency(values.currentAnnualIncome),
@@ -484,65 +476,86 @@ const Calculator = () => {
               )}
             </div>
 
-            <div className="mt-8">
-              <h3 className="text-xl font-semibold mb-4">Yearly Breakdown</h3>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Age</TableHead>
-                      <TableHead>Portfolio Value</TableHead>
-                      <TableHead>Contribution</TableHead>
-                      <TableHead>SS Income</TableHead>
-                      <TableHead>Withdrawal</TableHead>
-                      <TableHead>Expenses (Inflated)</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {result.yearlyBreakdown.map((year, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{year.age}</TableCell>
-                        <TableCell>
-                          ${year.portfolioValue.toLocaleString(undefined, {
-                            maximumFractionDigits: 0,
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          ${year.contribution.toLocaleString(undefined, {
-                            maximumFractionDigits: 0,
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          ${year.socialSecurityIncome.toLocaleString(undefined, {
-                            maximumFractionDigits: 0,
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          ${year.withdrawal.toLocaleString(undefined, {
-                            maximumFractionDigits: 0,
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          {year.isRetired ? (
-                            `$${year.inflatedExpenses.toLocaleString(undefined, {
-                              maximumFractionDigits: 0,
-                            })}`
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <span className={year.isRetired ? "text-red-500" : "text-green-500"}>
-                            {year.isRetired ? "Retired" : "Working"}
-                          </span>
-                        </TableCell>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-4 w-full"
+              onClick={() => setShowDetailedBreakdown(!showDetailedBreakdown)}
+            >
+              {showDetailedBreakdown ? (
+                <>
+                  Hide Detailed Breakdown
+                  <ChevronUp className="ml-2 h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Show Detailed Breakdown
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+
+            {showDetailedBreakdown && (
+              <div className="mt-4">
+                <h3 className="text-xl font-semibold mb-4">Yearly Breakdown</h3>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Age</TableHead>
+                        <TableHead>Portfolio Value</TableHead>
+                        <TableHead>Contribution</TableHead>
+                        <TableHead>SS Income</TableHead>
+                        <TableHead>Withdrawal</TableHead>
+                        <TableHead>Expenses (Inflated)</TableHead>
+                        <TableHead>Status</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {result.yearlyBreakdown.map((year, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{year.age}</TableCell>
+                          <TableCell>
+                            ${year.portfolioValue.toLocaleString(undefined, {
+                              maximumFractionDigits: 0,
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            ${year.contribution.toLocaleString(undefined, {
+                              maximumFractionDigits: 0,
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            ${year.socialSecurityIncome.toLocaleString(undefined, {
+                              maximumFractionDigits: 0,
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            ${year.withdrawal.toLocaleString(undefined, {
+                              maximumFractionDigits: 0,
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            {year.isRetired ? (
+                              `$${year.inflatedExpenses.toLocaleString(undefined, {
+                                maximumFractionDigits: 0,
+                              })}`
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <span className={year.isRetired ? "text-red-500" : "text-green-500"}>
+                              {year.isRetired ? "Retired" : "Working"}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </Card>
