@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Calculator, Stethoscope } from "lucide-react";
+import { Calculator, ArrowUpDown, Stethoscope } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,9 +14,14 @@ import {
 
 const menuItems = [
   {
-    title: "Monte Carlo Simulation",
+    title: "Retirement Calculator",
     url: "/calculator",
     icon: Calculator,
+  },
+  {
+    title: "Monte Carlo Simulation",
+    url: "/monte-carlo",
+    icon: ArrowUpDown,
   },
   {
     title: "Healthcare Planning",
