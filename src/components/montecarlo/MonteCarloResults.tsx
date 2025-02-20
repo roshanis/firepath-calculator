@@ -1,4 +1,3 @@
-
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 interface MonteCarloResultsProps {
@@ -9,32 +8,32 @@ interface MonteCarloResultsProps {
 }
 
 export function MonteCarloResults({ initialAmount, yearsToRetirement, simulationPeriod, currentAge = 30 }: MonteCarloResultsProps) {
-  // Asset class definitions with historical returns and volatility
+  // Asset class definitions with updated returns and volatility
   const assetClasses = {
     usStocks: {
       name: "U.S. Stocks (S&P 500)",
-      meanReturn: 0.10,  // 10% historical average
-      volatility: 0.15   // 15% standard deviation
+      meanReturn: 0.095,  // 9.5% annualized return
+      volatility: 0.145   // 14.5% volatility
     },
     usBonds: {
       name: "U.S. Bonds (Bloomberg Aggregate)",
-      meanReturn: 0.05,  // 5% historical average
-      volatility: 0.05   // 5% standard deviation
+      meanReturn: 0.045,  // 4.5% annualized return
+      volatility: 0.04    // 4% volatility
     },
     cash: {
       name: "Cash (3-month T-Bill)",
-      meanReturn: 0.03,  // 3% historical average
-      volatility: 0.01   // 1% standard deviation
+      meanReturn: 0.025,  // 2.5% annualized return
+      volatility: 0.01    // 1% volatility
     },
     intlStocks: {
       name: "International Stocks (MSCI EAFE)",
-      meanReturn: 0.09,  // 9% historical average
-      volatility: 0.17   // 17% standard deviation
+      meanReturn: 0.06,   // 6% annualized return
+      volatility: 0.16    // 16% volatility
     },
     intlBonds: {
       name: "International Bonds (Bloomberg Global ex-U.S.)",
-      meanReturn: 0.04,  // 4% historical average
-      volatility: 0.07   // 7% standard deviation
+      meanReturn: 0.035,  // 3.5% annualized return
+      volatility: 0.06    // 6% volatility
     }
   };
 
