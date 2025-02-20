@@ -22,7 +22,7 @@ const estimateSocialSecurity = (annualIncome: number): number => {
 export const calculateRetirement = (values: CalculatorFormValues): CalculationResult => {
   const currentAge = parseInt(values.age);
   const income = parseFloat(values.currentAnnualIncome);
-  const annualSavings = parseFloat(values.currentAnnualSavings);
+  const annualSavings = income * 0.125; // Fixed 12.5% contribution rate
   const hsaContribution = parseFloat(values.hsaContribution || "0");
   const totalAnnualSavings = annualSavings + hsaContribution;
   const annualExpenses = parseFloat(values.currentAnnualExpenses) || (income - totalAnnualSavings);
@@ -51,25 +51,26 @@ export const calculateRetirement = (values: CalculatorFormValues): CalculationRe
   let portfolio = currentPortfolio;
   let success = true;
   let currentExpenses = annualExpenses;
-  let currentSavings = totalAnnualSavings;
+  let currentIncome = income;
   let currentSocialSecurity = ssIncomeAfter67;
   const yearlyBreakdown = [];
   
   // Continue working and saving until age 67
   while (age < retirementAge) {
+    const yearlyContribution = currentIncome * 0.125; // 12.5% of current income
     yearlyBreakdown.push({
       age,
       portfolioValue: portfolio,
-      contribution: currentSavings,
+      contribution: yearlyContribution,
       withdrawal: 0,
       isRetired: false,
       inflatedExpenses: currentExpenses,
       socialSecurityIncome: 0,
     });
     
-    portfolio = (portfolio + currentSavings) * (1 + annualReturn);
+    portfolio = (portfolio + yearlyContribution) * (1 + annualReturn);
     currentExpenses *= (1 + inflationRate);
-    currentSavings *= (1 + inflationRate);
+    currentIncome *= (1 + inflationRate); // Income increases with inflation
     age++;
   }
   
