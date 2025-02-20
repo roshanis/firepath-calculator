@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
+import { MonteCarloResults } from "./MonteCarloResults";
 
 const simulationFormSchema = z.object({
   planningType: z.string(),
@@ -40,6 +41,7 @@ const simulationFormSchema = z.object({
 
 export function MonteCarloForm() {
   const [activeTab, setActiveTab] = useState("starting-portfolio");
+  const [showResults, setShowResults] = useState(false);
 
   const form = useForm<z.infer<typeof simulationFormSchema>>({
     resolver: zodResolver(simulationFormSchema),
@@ -63,6 +65,7 @@ export function MonteCarloForm() {
 
   function onSubmit(values: z.infer<typeof simulationFormSchema>) {
     console.log(values);
+    setShowResults(true);
   }
 
   const simulationFields = [
@@ -166,13 +169,21 @@ export function MonteCarloForm() {
               <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
                 Run Simulation
               </Button>
-              <Button type="button" variant="outline">
-                Cancel
+              <Button type="button" variant="outline" onClick={() => setShowResults(false)}>
+                Reset
               </Button>
             </div>
           </form>
         </Form>
       </div>
+
+      {showResults && (
+        <MonteCarloResults
+          initialAmount={Number(form.getValues("initialAmount"))}
+          yearsToRetirement={Number(form.getValues("yearsToRetirement"))}
+          simulationPeriod={Number(form.getValues("simulationPeriod"))}
+        />
+      )}
     </div>
   );
 }
