@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Calculator, LifeBuoy } from "lucide-react";
+import { Calculator, Stethoscope } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,9 +19,9 @@ const menuItems = [
     icon: Calculator,
   },
   {
-    title: "Life Challenges",
-    url: "/life-challenges",
-    icon: LifeBuoy,
+    title: "Healthcare Planning",
+    url: "/healthcare-calculator",
+    icon: Stethoscope,
   },
 ];
 
