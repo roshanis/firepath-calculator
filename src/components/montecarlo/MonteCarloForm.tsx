@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -46,7 +45,6 @@ export function MonteCarloForm() {
   const [activeTab, setActiveTab] = useState("starting-portfolio");
   const [showResults, setShowResults] = useState(false);
 
-  // Get retirement calculator data from localStorage if available
   const getRetirementData = () => {
     const savedData = localStorage.getItem('retirementCalculatorData');
     if (savedData) {
@@ -168,16 +166,18 @@ export function MonteCarloForm() {
               
               <TabsContent value="starting-portfolio" className="mt-4">
                 <div className="space-y-4">
-                  {[...Array(10)].map((_, index) => (
+                  {[...Array(5)].map((_, index) => (
                     <div key={index} className="grid grid-cols-2 gap-4">
                       <Select>
                         <SelectTrigger>
                           <SelectValue placeholder="Select asset class..." />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="stocks">Stocks</SelectItem>
-                          <SelectItem value="bonds">Bonds</SelectItem>
-                          <SelectItem value="cash">Cash</SelectItem>
+                          <SelectItem value="usStocks">U.S. Stocks (S&P 500) - 9.5% return</SelectItem>
+                          <SelectItem value="usBonds">U.S. Bonds (Bloomberg Aggregate) - 4.5% return</SelectItem>
+                          <SelectItem value="cash">Cash (3-month T-Bill) - 2.5% return</SelectItem>
+                          <SelectItem value="intlStocks">International Stocks (MSCI EAFE) - 6% return</SelectItem>
+                          <SelectItem value="intlBonds">International Bonds (Bloomberg Global ex-U.S.) - 3.5% return</SelectItem>
                         </SelectContent>
                       </Select>
                       <Input type="number" placeholder="Allocation %" />
