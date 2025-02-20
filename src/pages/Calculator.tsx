@@ -25,7 +25,7 @@ const Calculator = () => {
       age: "",
       maritalStatus: "",
       currentAnnualIncome: "",
-      currentAnnualSavings: "",
+      currentAnnualSavings: "12.5",
       currentAnnualExpenses: "",
       currentPortfolioValue: "",
       annualReturnOnInvestment: "",
@@ -48,7 +48,7 @@ const Calculator = () => {
       const processedValues = {
         ...values,
         currentAnnualIncome: parseCurrency(values.currentAnnualIncome),
-        currentAnnualSavings: parseCurrency(values.currentAnnualSavings),
+        currentAnnualSavings: values.currentAnnualSavings,
         currentAnnualExpenses: parseCurrency(values.currentAnnualExpenses),
         currentPortfolioValue: parseCurrency(values.currentPortfolioValue),
         hsaContribution: values.hsaContribution ? parseCurrency(values.hsaContribution) : "",
@@ -122,14 +122,13 @@ const Calculator = () => {
                     name="currentAnnualSavings"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{showSpouseFields ? "Your Annual Savings ($)" : "Current Annual Savings ($)"}</FormLabel>
+                        <FormLabel>{showSpouseFields ? "Your Annual Contributions (%)" : "Current Annual Contributions (%)"}</FormLabel>
                         <FormControl>
                           <Input
-                            type="text"
-                            placeholder="25,000"
+                            type="number"
+                            step="0.1"
+                            placeholder="12.5"
                             {...field}
-                            onChange={(e) => field.onChange(e.target.value)}
-                            onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
                           />
                         </FormControl>
                         <FormMessage />
