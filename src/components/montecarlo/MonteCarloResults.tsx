@@ -9,11 +9,83 @@ interface MonteCarloResultsProps {
 }
 
 export function MonteCarloResults({ initialAmount, yearsToRetirement, simulationPeriod, currentAge = 30 }: MonteCarloResultsProps) {
-  // Generate sample data for visualization
+  // Asset class definitions with historical returns and volatility
+  const assetClasses = {
+    usStocks: {
+      name: "U.S. Stocks (S&P 500)",
+      meanReturn: 0.10,  // 10% historical average
+      volatility: 0.15   // 15% standard deviation
+    },
+    usBonds: {
+      name: "U.S. Bonds (Bloomberg Aggregate)",
+      meanReturn: 0.05,  // 5% historical average
+      volatility: 0.05   // 5% standard deviation
+    },
+    cash: {
+      name: "Cash (3-month T-Bill)",
+      meanReturn: 0.03,  // 3% historical average
+      volatility: 0.01   // 1% standard deviation
+    },
+    intlStocks: {
+      name: "International Stocks (MSCI EAFE)",
+      meanReturn: 0.09,  // 9% historical average
+      volatility: 0.17   // 17% standard deviation
+    },
+    intlBonds: {
+      name: "International Bonds (Bloomberg Global ex-U.S.)",
+      meanReturn: 0.04,  // 4% historical average
+      volatility: 0.07   // 7% standard deviation
+    }
+  };
+
+  // Portfolio allocations for different risk profiles
+  const portfolios = {
+    conservative: {
+      usStocks: 0.20,
+      usBonds: 0.40,
+      cash: 0.20,
+      intlStocks: 0.10,
+      intlBonds: 0.10
+    },
+    moderate: {
+      usStocks: 0.35,
+      usBonds: 0.25,
+      cash: 0.10,
+      intlStocks: 0.20,
+      intlBonds: 0.10
+    },
+    aggressive: {
+      usStocks: 0.45,
+      usBonds: 0.15,
+      cash: 0.05,
+      intlStocks: 0.30,
+      intlBonds: 0.05
+    }
+  };
+
+  // Generate sample data using Monte Carlo simulation
   const generateSimulationData = () => {
     const data = [];
     const numSimulations = 1000;
-    const returns = [0.04, 0.06, 0.08, 0.10, 0.12]; // Sample returns
+
+    // Helper function to generate random normal distribution
+    const generateNormalRandom = (mean: number, stdDev: number) => {
+      const u1 = Math.random();
+      const u2 = Math.random();
+      const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      return mean + stdDev * z;
+    };
+
+    // Calculate portfolio return based on allocation
+    const calculatePortfolioReturn = (allocation: typeof portfolios.conservative) => {
+      let totalReturn = 0;
+      for (const [asset, weight] of Object.entries(allocation)) {
+        const assetClass = assetClasses[asset as keyof typeof assetClasses];
+        const assetReturn = generateNormalRandom(assetClass.meanReturn, assetClass.volatility);
+        totalReturn += assetReturn * weight;
+      }
+      return totalReturn;
+    };
 
     for (let i = 0; i <= simulationPeriod; i++) {
       const yearData: any = { 
@@ -21,15 +93,15 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
         age: currentAge + i
       };
       
-      // Generate multiple paths
-      for (let sim = 1; sim <= 3; sim++) {
+      // Generate portfolio values for each risk profile
+      Object.entries(portfolios).forEach(([profile, allocation]) => {
         let amount = initialAmount;
         for (let y = 0; y < i; y++) {
-          const randomReturn = returns[Math.floor(Math.random() * returns.length)];
-          amount *= (1 + randomReturn);
+          const return_ = calculatePortfolioReturn(allocation);
+          amount *= (1 + return_);
         }
-        yearData[`simulation${sim}`] = Math.round(amount);
-      }
+        yearData[profile] = Math.round(amount);
+      });
       
       data.push(yearData);
     }
@@ -58,15 +130,15 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
     <div className="mt-8 space-y-6">
       <div className="bg-white p-6 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4">Monte Carlo Simulation Results</h2>
-        <div className="h-[500px]"> {/* Increased height for better visibility */}
+        <div className="h-[500px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart 
               data={data}
               margin={{
                 top: 20,
                 right: 30,
-                left: 80, // Increased left margin for Y-axis labels
-                bottom: 60 // Increased bottom margin for X-axis labels
+                left: 80,
+                bottom: 60
               }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -75,7 +147,7 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
                 label={{ 
                   value: 'Age', 
                   position: 'bottom', 
-                  offset: 40 // Increased offset for better spacing
+                  offset: 40
                 }}
                 tick={{ fontSize: 12 }}
                 tickMargin={10}
@@ -86,7 +158,7 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
                   value: 'Portfolio Value', 
                   angle: -90, 
                   position: 'insideLeft',
-                  offset: -60 // Adjusted offset for better positioning
+                  offset: -60
                 }}
                 tick={{ fontSize: 12 }}
                 tickMargin={10}
@@ -102,16 +174,16 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
               />
               <Line 
                 type="monotone" 
-                dataKey="simulation1" 
+                dataKey="conservative" 
                 stroke="#4f46e5" 
                 name="Conservative"
                 strokeWidth={2}
-                dot={false} // Removes dots for cleaner lines
-                activeDot={{ r: 6 }} // Larger dots on hover
+                dot={false}
+                activeDot={{ r: 6 }}
               />
               <Line 
                 type="monotone" 
-                dataKey="simulation2" 
+                dataKey="moderate" 
                 stroke="#10b981" 
                 name="Moderate"
                 strokeWidth={2}
@@ -120,7 +192,7 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
               />
               <Line 
                 type="monotone" 
-                dataKey="simulation3" 
+                dataKey="aggressive" 
                 stroke="#f59e0b" 
                 name="Aggressive"
                 strokeWidth={2}
@@ -134,19 +206,34 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-2">Success Rate</h3>
-          <p className="text-3xl font-bold text-green-600">95%</p>
-          <p className="text-sm text-gray-500 mt-1">Probability of meeting goals</p>
+          <h3 className="text-lg font-medium mb-2">Conservative Portfolio</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>U.S. Stocks: 20%</li>
+            <li>U.S. Bonds: 40%</li>
+            <li>Cash: 20%</li>
+            <li>Int'l Stocks: 10%</li>
+            <li>Int'l Bonds: 10%</li>
+          </ul>
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-2">Median Outcome</h3>
-          <p className="text-3xl font-bold text-blue-600">$2.5M</p>
-          <p className="text-sm text-gray-500 mt-1">Expected portfolio value</p>
+          <h3 className="text-lg font-medium mb-2">Moderate Portfolio</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>U.S. Stocks: 35%</li>
+            <li>U.S. Bonds: 25%</li>
+            <li>Cash: 10%</li>
+            <li>Int'l Stocks: 20%</li>
+            <li>Int'l Bonds: 10%</li>
+          </ul>
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-2">Worst Case</h3>
-          <p className="text-3xl font-bold text-yellow-600">$1.2M</p>
-          <p className="text-sm text-gray-500 mt-1">5th percentile outcome</p>
+          <h3 className="text-lg font-medium mb-2">Aggressive Portfolio</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>U.S. Stocks: 45%</li>
+            <li>U.S. Bonds: 15%</li>
+            <li>Cash: 5%</li>
+            <li>Int'l Stocks: 30%</li>
+            <li>Int'l Bonds: 5%</li>
+          </ul>
         </div>
       </div>
     </div>
