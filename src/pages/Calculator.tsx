@@ -1,3 +1,4 @@
+
 import { CalculatorSidebar } from "@/components/calculator/CalculatorSidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +12,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "r
 export default function Calculator() {
   const [initialInvestment, setInitialInvestment] = useState(10000);
   const [monthlyContribution, setMonthlyContribution] = useState(500);
-  const [yearsToInvest, setYearsToInvest] = useState(30);
+  const [currentAge, setCurrentAge] = useState(30);
+  const retirementAge = 67;
+  const [yearsToInvest, setYearsToInvest] = useState(retirementAge - currentAge);
   const [expectedReturn, setExpectedReturn] = useState(7);
   const [data, setData] = useState([]);
 
@@ -23,7 +26,7 @@ export default function Calculator() {
 
     for (let year = 0; year <= yearsToInvest; year++) {
       newData.push({
-        year,
+        year: currentAge + year,
         balance: Math.round(balance),
       });
 
@@ -64,14 +67,22 @@ export default function Calculator() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Years to Invest: {yearsToInvest}</Label>
+                <Label htmlFor="currentAge">Current Age: {currentAge}</Label>
                 <Slider
-                  value={[yearsToInvest]}
-                  onValueChange={([value]) => setYearsToInvest(value)}
-                  min={1}
-                  max={50}
+                  id="currentAge"
+                  value={[currentAge]}
+                  onValueChange={([value]) => {
+                    setCurrentAge(value);
+                    setYearsToInvest(retirementAge - value);
+                  }}
+                  min={18}
+                  max={65}
                   step={1}
                 />
+              </div>
+              <div className="grid gap-2">
+                <Label>Years until retirement: {yearsToInvest}</Label>
+                <p className="text-sm text-muted-foreground">Retirement age: {retirementAge}</p>
               </div>
               <div className="grid gap-2">
                 <Label>Expected Annual Return: {expectedReturn}%</Label>
