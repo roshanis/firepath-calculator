@@ -36,38 +36,47 @@ export function CalculatorSidebar() {
   const [isVisible, setIsVisible] = useState(false);
 
   return (
-    <div 
-      className="group transition-all duration-300 ease-in-out"
-      onMouseEnter={() => setIsVisible(true)}
-      onMouseLeave={() => setIsVisible(false)}
-    >
-      <Sidebar 
-        className={`transition-all duration-300 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-full'}`}
-      >
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Financial Planning</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {menuItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
-      {/* Hover trigger area when sidebar is hidden */}
-      <div 
-        className={`fixed left-0 top-0 h-full w-4 transition-opacity duration-300 ${isVisible ? 'opacity-0' : 'opacity-100'}`}
-      />
-    </div>
+    <SidebarProvider defaultOpen={false}>
+      <div className="flex min-h-screen w-full">
+        <div 
+          className="relative"
+          onMouseEnter={() => setIsVisible(true)}
+          onMouseLeave={() => setIsVisible(false)}
+        >
+          <Sidebar 
+            className={`transition-all duration-300 ease-in-out ${
+              isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
+            }`}
+            variant="floating"
+          >
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupLabel>Financial Planning</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {menuItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <Link to={item.url} className="flex items-center gap-2">
+                            <item.icon className="h-5 w-5" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+          </Sidebar>
+          {/* Hover trigger area */}
+          <div 
+            className={`fixed left-0 top-0 h-full w-4 bg-transparent z-50 transition-opacity duration-300 ${
+              isVisible ? 'opacity-0' : 'opacity-100'
+            }`}
+          />
+        </div>
+      </div>
+    </SidebarProvider>
   );
 }
