@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,6 +12,8 @@ import { CalculationResults } from "@/components/calculator/CalculationResults";
 import { formatCurrency, parseCurrency, calculateRetirement } from "@/utils/calculatorUtils";
 import { formSchema, CalculationResult } from "@/types/calculator";
 import type { CalculatorFormValues } from "@/types/calculator";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { CalculatorSidebar } from "@/components/calculator/CalculatorSidebar";
 
 const Calculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
@@ -68,132 +69,26 @@ const Calculator = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-12">
-      <Card className="max-w-2xl mx-auto p-6 glass">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Financial Independence Calculator</h1>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Respondent Information Section */}
-              <div className="col-span-2">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Your Information</h2>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="age"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Your Age</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="30" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="currentAnnualIncome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{showSpouseFields ? "Your Annual Income ($)" : "Current Annual Income ($)"}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="75,000"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="currentAnnualSavings"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{showSpouseFields ? "Your Annual Savings ($)" : "Current Annual Savings ($)"}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="25,000"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="currentPortfolioValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{showSpouseFields ? "Your Portfolio Value ($)" : "Current Portfolio Value ($)"}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="100,000"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Marital Status Section */}
-              <div className="col-span-2 mt-4">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Marital Status</h2>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="maritalStatus"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Marital Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select marital status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="single">Single</SelectItem>
-                        <SelectItem value="married">Married</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Spouse Information Section */}
-              {showSpouseFields && (
-                <>
-                  <div className="col-span-2 mt-4">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Spouse Information</h2>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <CalculatorSidebar />
+        <div className="flex-1 bg-gradient-to-b from-white to-gray-50 py-12">
+          <Card className="max-w-2xl mx-auto p-6 glass">
+            <h1 className="text-3xl font-bold text-gray-900 mb-8">Financial Independence Calculator</h1>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="col-span-2">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Your Information</h2>
                   </div>
 
                   <FormField
                     control={form.control}
-                    name="spouseAge"
+                    name="age"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Spouse's Age</FormLabel>
+                        <FormLabel>Your Age</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="30" {...field} />
                         </FormControl>
@@ -204,10 +99,10 @@ const Calculator = () => {
 
                   <FormField
                     control={form.control}
-                    name="spouseIncome"
+                    name="currentAnnualIncome"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Spouse's Annual Income ($)</FormLabel>
+                        <FormLabel>{showSpouseFields ? "Your Annual Income ($)" : "Current Annual Income ($)"}</FormLabel>
                         <FormControl>
                           <Input
                             type="text"
@@ -221,98 +116,204 @@ const Calculator = () => {
                       </FormItem>
                     )}
                   />
-                </>
-              )}
 
-              {/* Household Expenses Section */}
-              <div className="col-span-2 mt-4">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Household Information</h2>
-              </div>
+                  <FormField
+                    control={form.control}
+                    name="currentAnnualSavings"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{showSpouseFields ? "Your Annual Savings ($)" : "Current Annual Savings ($)"}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="25,000"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="currentAnnualExpenses"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Annual Household Expenses ($)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="50,000"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                  <FormField
+                    control={form.control}
+                    name="currentPortfolioValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{showSpouseFields ? "Your Portfolio Value ($)" : "Current Portfolio Value ($)"}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="100,000"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="col-span-2 mt-4">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Marital Status</h2>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="maritalStatus"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Marital Status</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select marital status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="single">Single</SelectItem>
+                            <SelectItem value="married">Married</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {showSpouseFields && (
+                    <>
+                      <div className="col-span-2 mt-4">
+                        <h2 className="text-xl font-semibold mb-4 text-gray-800">Spouse Information</h2>
+                      </div>
+
+                      <FormField
+                        control={form.control}
+                        name="spouseAge"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Spouse's Age</FormLabel>
+                            <FormControl>
+                              <Input type="number" placeholder="30" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              <FormField
-                control={form.control}
-                name="hsaContribution"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Annual HSA Contribution ($) - Optional</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="text"
-                        placeholder="3,850" 
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                      <FormField
+                        control={form.control}
+                        name="spouseIncome"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Spouse's Annual Income ($)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="text"
+                                placeholder="75,000"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value)}
+                                onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    </>
+                  )}
 
-              {/* Investment Parameters Section */}
-              <div className="col-span-2 mt-4">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Investment Parameters</h2>
-              </div>
+                  <div className="col-span-2 mt-4">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Household Information</h2>
+                  </div>
 
-              <FormField
-                control={form.control}
-                name="annualReturnOnInvestment"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Annual Return on Investment (%)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="7" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="currentAnnualExpenses"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Annual Household Expenses ($)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="50,000"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="withdrawalRate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Withdrawal Rate (%)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="4" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                  <FormField
+                    control={form.control}
+                    name="hsaContribution"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Annual HSA Contribution ($) - Optional</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="text"
+                            placeholder="3,850" 
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            onBlur={(e) => field.onChange(formatCurrency(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <Button type="submit" className="w-full" size="lg">
-              Calculate
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </form>
-        </Form>
+                  <div className="col-span-2 mt-4">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Investment Parameters</h2>
+                  </div>
 
-        {result && <CalculationResults result={result} />}
-      </Card>
-    </div>
+                  <FormField
+                    control={form.control}
+                    name="annualReturnOnInvestment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Annual Return on Investment (%)</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="7" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="withdrawalRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Withdrawal Rate (%)</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="4" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button type="submit" className="w-full" size="lg">
+                  Calculate
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </form>
+            </Form>
+
+            {result && <CalculationResults result={result} />}
+          </Card>
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
