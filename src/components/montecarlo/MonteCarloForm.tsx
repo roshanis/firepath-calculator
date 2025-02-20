@@ -149,12 +149,12 @@ export function MonteCarloForm() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="bg-gray-50 p-4 rounded-lg mb-6">
-        <h2 className="text-xl font-semibold mb-2">Simulation Model Configuration</h2>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="bg-gray-50 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl font-semibold mb-2">Simulation Model Configuration</h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
               {simulationFields.map((field) => (
                 <FormField
                   key={field.name}
@@ -162,14 +162,14 @@ export function MonteCarloForm() {
                   name={field.name as keyof z.infer<typeof simulationFormSchema>}
                   render={({ field: formField }) => (
                     <FormItem>
-                      <FormLabel>{field.label}</FormLabel>
+                      <FormLabel className="text-sm sm:text-base">{field.label}</FormLabel>
                       <FormControl>
                         {field.type === "select" ? (
                           <Select
                             value={formField.value}
                             onValueChange={formField.onChange}
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="text-sm sm:text-base">
                               <SelectValue placeholder={formField.value} />
                             </SelectTrigger>
                             <SelectContent>
@@ -179,7 +179,7 @@ export function MonteCarloForm() {
                             </SelectContent>
                           </Select>
                         ) : (
-                          <Input {...formField} type="text" />
+                          <Input {...formField} type="text" className="text-sm sm:text-base" />
                         )}
                       </FormControl>
                     </FormItem>
@@ -188,87 +188,98 @@ export function MonteCarloForm() {
               ))}
             </div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="starting-portfolio">Starting Portfolio</TabsTrigger>
-                <TabsTrigger value="ending-portfolio">Ending Portfolio</TabsTrigger>
-                <TabsTrigger value="financial-goals">Financial Goals</TabsTrigger>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
+                <TabsTrigger value="starting-portfolio" className="text-sm sm:text-base">Starting Portfolio</TabsTrigger>
+                <TabsTrigger value="ending-portfolio" className="text-sm sm:text-base">Ending Portfolio</TabsTrigger>
+                <TabsTrigger value="financial-goals" className="text-sm sm:text-base">Financial Goals</TabsTrigger>
               </TabsList>
               
               <TabsContent value="starting-portfolio" className="mt-4">
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {portfolioError && (
-                    <div className="text-red-500 text-sm font-medium">{portfolioError}</div>
+                    <div className="text-red-500 text-xs sm:text-sm font-medium">{portfolioError}</div>
                   )}
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormLabel>U.S. Stocks (S&P 500)</FormLabel>
-                    <Input 
-                      type="number" 
-                      placeholder="Allocation %" 
-                      value={selectedPortfolio.usStocks * 100}
-                      onChange={(e) => handlePortfolioChange('usStocks', e.target.value)}
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="space-y-3">
+                      <div>
+                        <FormLabel className="text-sm sm:text-base">U.S. Stocks (S&P 500)</FormLabel>
+                        <Input 
+                          type="number" 
+                          placeholder="Allocation %" 
+                          value={selectedPortfolio.usStocks * 100}
+                          onChange={(e) => handlePortfolioChange('usStocks', e.target.value)}
+                          className="mt-1 text-sm sm:text-base"
+                        />
+                      </div>
+                      <div>
+                        <FormLabel className="text-sm sm:text-base">U.S. Bonds</FormLabel>
+                        <Input 
+                          type="number" 
+                          placeholder="Allocation %" 
+                          value={selectedPortfolio.usBonds * 100}
+                          onChange={(e) => handlePortfolioChange('usBonds', e.target.value)}
+                          className="mt-1 text-sm sm:text-base"
+                        />
+                      </div>
+                      <div>
+                        <FormLabel className="text-sm sm:text-base">Cash</FormLabel>
+                        <Input 
+                          type="number" 
+                          placeholder="Allocation %" 
+                          value={selectedPortfolio.cash * 100}
+                          onChange={(e) => handlePortfolioChange('cash', e.target.value)}
+                          className="mt-1 text-sm sm:text-base"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <FormLabel className="text-sm sm:text-base">International Stocks</FormLabel>
+                        <Input 
+                          type="number" 
+                          placeholder="Allocation %" 
+                          value={selectedPortfolio.intlStocks * 100}
+                          onChange={(e) => handlePortfolioChange('intlStocks', e.target.value)}
+                          className="mt-1 text-sm sm:text-base"
+                        />
+                      </div>
+                      <div>
+                        <FormLabel className="text-sm sm:text-base">International Bonds</FormLabel>
+                        <Input 
+                          type="number" 
+                          placeholder="Allocation %" 
+                          value={selectedPortfolio.intlBonds * 100}
+                          onChange={(e) => handlePortfolioChange('intlBonds', e.target.value)}
+                          className="mt-1 text-sm sm:text-base"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormLabel>U.S. Bonds</FormLabel>
-                    <Input 
-                      type="number" 
-                      placeholder="Allocation %" 
-                      value={selectedPortfolio.usBonds * 100}
-                      onChange={(e) => handlePortfolioChange('usBonds', e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormLabel>Cash</FormLabel>
-                    <Input 
-                      type="number" 
-                      placeholder="Allocation %" 
-                      value={selectedPortfolio.cash * 100}
-                      onChange={(e) => handlePortfolioChange('cash', e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormLabel>International Stocks</FormLabel>
-                    <Input 
-                      type="number" 
-                      placeholder="Allocation %" 
-                      value={selectedPortfolio.intlStocks * 100}
-                      onChange={(e) => handlePortfolioChange('intlStocks', e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormLabel>International Bonds</FormLabel>
-                    <Input 
-                      type="number" 
-                      placeholder="Allocation %" 
-                      value={selectedPortfolio.intlBonds * 100}
-                      onChange={(e) => handlePortfolioChange('intlBonds', e.target.value)}
-                    />
-                  </div>
-                  <div className="text-right text-sm text-gray-600">
+                  <div className="text-right text-xs sm:text-sm text-gray-600">
                     Total: {(Object.values(selectedPortfolio).reduce((sum, val) => sum + val, 0) * 100).toFixed(1)}%
                   </div>
                 </div>
               </TabsContent>
 
               <TabsContent value="ending-portfolio">
-                <div className="h-64 flex items-center justify-center text-gray-500">
+                <div className="h-48 sm:h-64 flex items-center justify-center text-gray-500 text-sm sm:text-base">
                   Ending Portfolio Configuration
                 </div>
               </TabsContent>
 
               <TabsContent value="financial-goals">
-                <div className="h-64 flex items-center justify-center text-gray-500">
+                <div className="h-48 sm:h-64 flex items-center justify-center text-gray-500 text-sm sm:text-base">
                   Financial Goals Configuration
                 </div>
               </TabsContent>
             </Tabs>
 
-            <div className="flex justify-center gap-4 mt-6">
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mt-4 sm:mt-6">
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto text-sm sm:text-base">
                 Run Simulation
               </Button>
-              <Button type="button" variant="outline" onClick={() => setShowResults(false)}>
+              <Button type="button" variant="outline" onClick={() => setShowResults(false)} className="w-full sm:w-auto text-sm sm:text-base">
                 Reset
               </Button>
             </div>
