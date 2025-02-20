@@ -5,9 +5,22 @@ interface MonteCarloResultsProps {
   yearsToRetirement: number;
   simulationPeriod: number;
   currentAge?: number;
+  selectedPortfolio?: {
+    usStocks: number;
+    usBonds: number;
+    cash: number;
+    intlStocks: number;
+    intlBonds: number;
+  };
 }
 
-export function MonteCarloResults({ initialAmount, yearsToRetirement, simulationPeriod, currentAge = 30 }: MonteCarloResultsProps) {
+export function MonteCarloResults({ 
+  initialAmount, 
+  yearsToRetirement, 
+  simulationPeriod, 
+  currentAge = 30,
+  selectedPortfolio
+}: MonteCarloResultsProps) {
   // Asset class definitions with updated returns and volatility
   const assetClasses = {
     usStocks: {
@@ -59,7 +72,8 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
       cash: 0.05,
       intlStocks: 0.30,
       intlBonds: 0.05
-    }
+    },
+    ...(selectedPortfolio && { selected: selectedPortfolio })
   };
 
   // Generate sample data using Monte Carlo simulation
@@ -198,6 +212,17 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
                 dot={false}
                 activeDot={{ r: 6 }}
               />
+              {selectedPortfolio && (
+                <Line 
+                  type="monotone" 
+                  dataKey="selected" 
+                  stroke="#ef4444" 
+                  name="Selected Portfolio"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 6 }}
+                />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -234,6 +259,18 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
             <li>Int'l Bonds: 5%</li>
           </ul>
         </div>
+        {selectedPortfolio && (
+          <div className="bg-white p-4 rounded-lg shadow">
+            <h3 className="text-lg font-medium mb-2">Selected Portfolio</h3>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>U.S. Stocks: {(selectedPortfolio.usStocks * 100).toFixed(0)}%</li>
+              <li>U.S. Bonds: {(selectedPortfolio.usBonds * 100).toFixed(0)}%</li>
+              <li>Cash: {(selectedPortfolio.cash * 100).toFixed(0)}%</li>
+              <li>Int'l Stocks: {(selectedPortfolio.intlStocks * 100).toFixed(0)}%</li>
+              <li>Int'l Bonds: {(selectedPortfolio.intlBonds * 100).toFixed(0)}%</li>
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
