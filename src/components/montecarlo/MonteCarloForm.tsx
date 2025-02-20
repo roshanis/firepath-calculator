@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -47,11 +46,11 @@ export function MonteCarloForm() {
   const [activeTab, setActiveTab] = useState("starting-portfolio");
   const [showResults, setShowResults] = useState(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio>({
-    usStocks: 0,
-    usBonds: 0,
-    cash: 0,
-    intlStocks: 0,
-    intlBonds: 0,
+    usStocks: 0.45,
+    usBonds: 0.15,
+    cash: 0.05,
+    intlStocks: 0.30,
+    intlBonds: 0.05
   });
   const [portfolioError, setPortfolioError] = useState<string | null>(null);
 
@@ -107,6 +106,8 @@ export function MonteCarloForm() {
 
   const handlePortfolioChange = (asset: keyof Portfolio, value: string) => {
     const numValue = Number(value) / 100;
+    if (isNaN(numValue)) return;
+    
     const newPortfolio = { ...selectedPortfolio, [asset]: numValue };
     
     // Calculate total allocation
@@ -206,8 +207,11 @@ export function MonteCarloForm() {
                         <FormLabel className="text-sm sm:text-base">U.S. Stocks (S&P 500)</FormLabel>
                         <Input 
                           type="number" 
+                          min="0"
+                          max="100"
+                          step="1"
                           placeholder="Allocation %" 
-                          value={selectedPortfolio.usStocks * 100}
+                          value={(selectedPortfolio.usStocks * 100).toString()}
                           onChange={(e) => handlePortfolioChange('usStocks', e.target.value)}
                           className="mt-1 text-sm sm:text-base"
                         />
@@ -216,8 +220,11 @@ export function MonteCarloForm() {
                         <FormLabel className="text-sm sm:text-base">U.S. Bonds</FormLabel>
                         <Input 
                           type="number" 
+                          min="0"
+                          max="100"
+                          step="1"
                           placeholder="Allocation %" 
-                          value={selectedPortfolio.usBonds * 100}
+                          value={(selectedPortfolio.usBonds * 100).toString()}
                           onChange={(e) => handlePortfolioChange('usBonds', e.target.value)}
                           className="mt-1 text-sm sm:text-base"
                         />
@@ -226,8 +233,11 @@ export function MonteCarloForm() {
                         <FormLabel className="text-sm sm:text-base">Cash</FormLabel>
                         <Input 
                           type="number" 
+                          min="0"
+                          max="100"
+                          step="1"
                           placeholder="Allocation %" 
-                          value={selectedPortfolio.cash * 100}
+                          value={(selectedPortfolio.cash * 100).toString()}
                           onChange={(e) => handlePortfolioChange('cash', e.target.value)}
                           className="mt-1 text-sm sm:text-base"
                         />
@@ -238,8 +248,11 @@ export function MonteCarloForm() {
                         <FormLabel className="text-sm sm:text-base">International Stocks</FormLabel>
                         <Input 
                           type="number" 
+                          min="0"
+                          max="100"
+                          step="1"
                           placeholder="Allocation %" 
-                          value={selectedPortfolio.intlStocks * 100}
+                          value={(selectedPortfolio.intlStocks * 100).toString()}
                           onChange={(e) => handlePortfolioChange('intlStocks', e.target.value)}
                           className="mt-1 text-sm sm:text-base"
                         />
@@ -248,8 +261,11 @@ export function MonteCarloForm() {
                         <FormLabel className="text-sm sm:text-base">International Bonds</FormLabel>
                         <Input 
                           type="number" 
+                          min="0"
+                          max="100"
+                          step="1"
                           placeholder="Allocation %" 
-                          value={selectedPortfolio.intlBonds * 100}
+                          value={(selectedPortfolio.intlBonds * 100).toString()}
                           onChange={(e) => handlePortfolioChange('intlBonds', e.target.value)}
                           className="mt-1 text-sm sm:text-base"
                         />
