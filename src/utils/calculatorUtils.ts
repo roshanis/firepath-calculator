@@ -55,6 +55,7 @@ export const calculateRetirement = (values: CalculatorFormValues): CalculationRe
   let currentSocialSecurity = ssIncomeAfter67;
   const yearlyBreakdown = [];
   
+  // Continue working and saving until age 67
   while (age < retirementAge) {
     yearlyBreakdown.push({
       age,
@@ -72,8 +73,9 @@ export const calculateRetirement = (values: CalculatorFormValues): CalculationRe
     age++;
   }
   
+  // Start withdrawals and use Social Security at age 67
   for (let year = 1; year <= (lifeExpectancy - retirementAge); year++) {
-    const ssIncome = age >= 67 ? totalSS : 0;
+    const ssIncome = totalSS;  // Now always using SS since we're already at 67
     const grossWithdrawal = Math.max(currentExpenses - ssIncome, 0);
     
     yearlyBreakdown.push({
