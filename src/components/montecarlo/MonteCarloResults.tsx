@@ -5,7 +5,7 @@ interface MonteCarloResultsProps {
   initialAmount: number;
   yearsToRetirement: number;
   simulationPeriod: number;
-  currentAge?: number;  // Added currentAge prop
+  currentAge?: number;
 }
 
 export function MonteCarloResults({ initialAmount, yearsToRetirement, simulationPeriod, currentAge = 30 }: MonteCarloResultsProps) {
@@ -18,7 +18,7 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
     for (let i = 0; i <= simulationPeriod; i++) {
       const yearData: any = { 
         year: i,
-        age: currentAge + i // Add age to the data
+        age: currentAge + i
       };
       
       // Generate multiple paths
@@ -38,33 +38,76 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
 
   const data = generateSimulationData();
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-4 border rounded-lg shadow-lg">
+          <p className="font-semibold text-gray-900">Age: {label}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} style={{ color: entry.color }} className="text-sm">
+              {entry.name}: ${entry.value.toLocaleString()}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="mt-8 space-y-6">
       <div className="bg-white p-6 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4">Monte Carlo Simulation Results</h2>
-        <div className="h-[400px]">
+        <div className="h-[500px]"> {/* Increased height for better visibility */}
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
+            <LineChart 
+              data={data}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 80, // Increased left margin for Y-axis labels
+                bottom: 60 // Increased bottom margin for X-axis labels
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis 
                 dataKey="age" 
-                label={{ value: 'Age', position: 'bottom' }}
+                label={{ 
+                  value: 'Age', 
+                  position: 'bottom', 
+                  offset: 40 // Increased offset for better spacing
+                }}
+                tick={{ fontSize: 12 }}
+                tickMargin={10}
               />
               <YAxis 
                 tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
-                label={{ value: 'Portfolio Value', angle: -90, position: 'insideLeft' }}
+                label={{ 
+                  value: 'Portfolio Value', 
+                  angle: -90, 
+                  position: 'insideLeft',
+                  offset: -60 // Adjusted offset for better positioning
+                }}
+                tick={{ fontSize: 12 }}
+                tickMargin={10}
               />
-              <Tooltip 
-                formatter={(value: number) => [`$${value.toLocaleString()}`, 'Portfolio Value']}
-                labelFormatter={(label) => `Age: ${label}`}
+              <Tooltip content={<CustomTooltip />} />
+              <Legend 
+                verticalAlign="bottom"
+                height={60}
+                wrapperStyle={{
+                  paddingTop: "20px",
+                  bottom: 0
+                }}
               />
-              <Legend />
               <Line 
                 type="monotone" 
                 dataKey="simulation1" 
                 stroke="#4f46e5" 
                 name="Conservative"
                 strokeWidth={2}
+                dot={false} // Removes dots for cleaner lines
+                activeDot={{ r: 6 }} // Larger dots on hover
               />
               <Line 
                 type="monotone" 
@@ -72,6 +115,8 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
                 stroke="#10b981" 
                 name="Moderate"
                 strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 6 }}
               />
               <Line 
                 type="monotone" 
@@ -79,6 +124,8 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
                 stroke="#f59e0b" 
                 name="Aggressive"
                 strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 6 }}
               />
             </LineChart>
           </ResponsiveContainer>
