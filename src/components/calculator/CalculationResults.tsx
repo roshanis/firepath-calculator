@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import { MarketComparison } from "./MarketComparison";
 
 interface CalculationResultsProps {
   result: CalculationResult;
@@ -29,6 +30,12 @@ export const CalculationResults = ({ result }: CalculationResultsProps) => {
           </p>
         )}
       </div>
+
+      <MarketComparison
+        initialInvestment={result.yearlyBreakdown[0].portfolioValue}
+        years={result.yearlyBreakdown.length}
+        startYear={new Date().getFullYear()}
+      />
 
       <Button
         type="button"
