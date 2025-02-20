@@ -10,14 +10,16 @@ import MonteCarloSimulation from "@/pages/MonteCarloSimulation";
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/calculator" element={<Calculator />} />
-        <Route path="/healthcare-calculator" element={<HealthcareCalculator />} />
-        <Route path="/monte-carlo" element={<MonteCarloSimulation />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
+      <div className="min-h-screen w-full">
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/calculator" element={<Calculator />} />
+          <Route path="/healthcare-calculator" element={<HealthcareCalculator />} />
+          <Route path="/monte-carlo" element={<MonteCarloSimulation />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+      </div>
     </Router>
   );
 }

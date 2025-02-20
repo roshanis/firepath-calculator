@@ -43,11 +43,12 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased overflow-x-hidden;
   }
 
   html {
     font-family: "Inter var", system-ui, sans-serif;
+    @apply scroll-smooth;
   }
 
   .glass {
@@ -59,6 +60,6 @@
   }
 
   .section-padding {
-    @apply px-4 py-16 sm:px-6 sm:py-24 lg:px-8;
+    @apply px-4 py-12 sm:px-6 sm:py-20 lg:px-8 lg:py-24;
   }
 }
