@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -22,6 +23,7 @@ import { useState, useEffect } from "react";
 import { MonteCarloResults } from "./MonteCarloResults";
 import { calculateRetirement } from "@/utils/calculatorUtils";
 import { CalculatorFormValues } from "@/types/calculator";
+import { Portfolio } from "./types";
 import { toast } from "sonner";
 
 const simulationFormSchema = z.object({
@@ -44,6 +46,14 @@ const simulationFormSchema = z.object({
 export function MonteCarloForm() {
   const [activeTab, setActiveTab] = useState("starting-portfolio");
   const [showResults, setShowResults] = useState(false);
+  const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio>({
+    usStocks: 0,
+    usBonds: 0,
+    cash: 0,
+    intlStocks: 0,
+    intlBonds: 0,
+  });
+  const [portfolioError, setPortfolioError] = useState<string | null>(null);
 
   const getRetirementData = () => {
     const savedData = localStorage.getItem('retirementCalculatorData');
@@ -95,7 +105,28 @@ export function MonteCarloForm() {
     }
   }, []);
 
+  const handlePortfolioChange = (asset: keyof Portfolio, value: string) => {
+    const numValue = Number(value) / 100;
+    const newPortfolio = { ...selectedPortfolio, [asset]: numValue };
+    
+    // Calculate total allocation
+    const total = Object.values(newPortfolio).reduce((sum, val) => sum + val, 0);
+    
+    if (total > 1) {
+      setPortfolioError("Total allocation cannot exceed 100%");
+    } else {
+      setPortfolioError(null);
+      setSelectedPortfolio(newPortfolio);
+    }
+  };
+
   function onSubmit(values: z.infer<typeof simulationFormSchema>) {
+    const total = Object.values(selectedPortfolio).reduce((sum, val) => sum + val, 0);
+    if (Math.abs(total - 1) > 0.001) {
+      setPortfolioError("Total allocation must equal 100%");
+      return;
+    }
+    
     console.log(values);
     setShowResults(true);
   }
@@ -166,23 +197,57 @@ export function MonteCarloForm() {
               
               <TabsContent value="starting-portfolio" className="mt-4">
                 <div className="space-y-4">
-                  {[...Array(5)].map((_, index) => (
-                    <div key={index} className="grid grid-cols-2 gap-4">
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select asset class..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="usStocks">U.S. Stocks (S&P 500) - 9.5% return</SelectItem>
-                          <SelectItem value="usBonds">U.S. Bonds (Bloomberg Aggregate) - 4.5% return</SelectItem>
-                          <SelectItem value="cash">Cash (3-month T-Bill) - 2.5% return</SelectItem>
-                          <SelectItem value="intlStocks">International Stocks (MSCI EAFE) - 6% return</SelectItem>
-                          <SelectItem value="intlBonds">International Bonds (Bloomberg Global ex-U.S.) - 3.5% return</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Input type="number" placeholder="Allocation %" />
-                    </div>
-                  ))}
+                  {portfolioError && (
+                    <div className="text-red-500 text-sm font-medium">{portfolioError}</div>
+                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormLabel>U.S. Stocks (S&P 500)</FormLabel>
+                    <Input 
+                      type="number" 
+                      placeholder="Allocation %" 
+                      value={selectedPortfolio.usStocks * 100}
+                      onChange={(e) => handlePortfolioChange('usStocks', e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormLabel>U.S. Bonds</FormLabel>
+                    <Input 
+                      type="number" 
+                      placeholder="Allocation %" 
+                      value={selectedPortfolio.usBonds * 100}
+                      onChange={(e) => handlePortfolioChange('usBonds', e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormLabel>Cash</FormLabel>
+                    <Input 
+                      type="number" 
+                      placeholder="Allocation %" 
+                      value={selectedPortfolio.cash * 100}
+                      onChange={(e) => handlePortfolioChange('cash', e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormLabel>International Stocks</FormLabel>
+                    <Input 
+                      type="number" 
+                      placeholder="Allocation %" 
+                      value={selectedPortfolio.intlStocks * 100}
+                      onChange={(e) => handlePortfolioChange('intlStocks', e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormLabel>International Bonds</FormLabel>
+                    <Input 
+                      type="number" 
+                      placeholder="Allocation %" 
+                      value={selectedPortfolio.intlBonds * 100}
+                      onChange={(e) => handlePortfolioChange('intlBonds', e.target.value)}
+                    />
+                  </div>
+                  <div className="text-right text-sm text-gray-600">
+                    Total: {(Object.values(selectedPortfolio).reduce((sum, val) => sum + val, 0) * 100).toFixed(1)}%
+                  </div>
                 </div>
               </TabsContent>
 
@@ -217,6 +282,7 @@ export function MonteCarloForm() {
           yearsToRetirement={Number(form.getValues("yearsToRetirement"))}
           simulationPeriod={Number(form.getValues("simulationPeriod"))}
           currentAge={retirementData?.currentAge || 30}
+          selectedPortfolio={selectedPortfolio}
         />
       )}
     </div>
