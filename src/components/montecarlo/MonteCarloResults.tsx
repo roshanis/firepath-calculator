@@ -5,9 +5,10 @@ interface MonteCarloResultsProps {
   initialAmount: number;
   yearsToRetirement: number;
   simulationPeriod: number;
+  currentAge?: number;  // Added currentAge prop
 }
 
-export function MonteCarloResults({ initialAmount, yearsToRetirement, simulationPeriod }: MonteCarloResultsProps) {
+export function MonteCarloResults({ initialAmount, yearsToRetirement, simulationPeriod, currentAge = 30 }: MonteCarloResultsProps) {
   // Generate sample data for visualization
   const generateSimulationData = () => {
     const data = [];
@@ -15,7 +16,10 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
     const returns = [0.04, 0.06, 0.08, 0.10, 0.12]; // Sample returns
 
     for (let i = 0; i <= simulationPeriod; i++) {
-      const yearData: any = { year: i };
+      const yearData: any = { 
+        year: i,
+        age: currentAge + i // Add age to the data
+      };
       
       // Generate multiple paths
       for (let sim = 1; sim <= 3; sim++) {
@@ -43,8 +47,8 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
-                dataKey="year" 
-                label={{ value: 'Years', position: 'bottom' }}
+                dataKey="age" 
+                label={{ value: 'Age', position: 'bottom' }}
               />
               <YAxis 
                 tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
@@ -52,6 +56,7 @@ export function MonteCarloResults({ initialAmount, yearsToRetirement, simulation
               />
               <Tooltip 
                 formatter={(value: number) => [`$${value.toLocaleString()}`, 'Portfolio Value']}
+                labelFormatter={(label) => `Age: ${label}`}
               />
               <Legend />
               <Line 

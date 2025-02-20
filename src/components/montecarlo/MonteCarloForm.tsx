@@ -56,7 +56,8 @@ export function MonteCarloForm() {
         return {
           initialAmount: parsedData.currentPortfolioValue?.replace(/,/g, '') || "1000000",
           yearsToRetirement: (67 - parseInt(parsedData.age)).toString() || "20",
-          annualReturn: parsedData.annualReturnOnInvestment || "7"
+          annualReturn: parsedData.annualReturnOnInvestment || "7",
+          currentAge: parseInt(parsedData.age)
         };
       } catch (error) {
         console.error('Error parsing retirement data:', error);
@@ -215,6 +216,7 @@ export function MonteCarloForm() {
           initialAmount={Number(form.getValues("initialAmount"))}
           yearsToRetirement={Number(form.getValues("yearsToRetirement"))}
           simulationPeriod={Number(form.getValues("simulationPeriod"))}
+          currentAge={retirementData?.currentAge || 30}
         />
       )}
     </div>
