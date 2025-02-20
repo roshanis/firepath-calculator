@@ -13,6 +13,13 @@ interface CalculationResultsProps {
 export const CalculationResults = ({ result }: CalculationResultsProps) => {
   const [showDetailedBreakdown, setShowDetailedBreakdown] = useState(false);
 
+  if (!result || !result.yearlyBreakdown || result.yearlyBreakdown.length === 0) {
+    return null;
+  }
+
+  const initialInvestment = result.yearlyBreakdown[0]?.portfolioValue || 0;
+  const years = result.yearlyBreakdown.length;
+
   return (
     <>
       <div className={`mt-8 p-4 rounded-lg ${
@@ -31,11 +38,13 @@ export const CalculationResults = ({ result }: CalculationResultsProps) => {
         )}
       </div>
 
-      <MarketComparison
-        initialInvestment={result.yearlyBreakdown[0].portfolioValue}
-        years={result.yearlyBreakdown.length}
-        startYear={new Date().getFullYear()}
-      />
+      {initialInvestment > 0 && (
+        <MarketComparison
+          initialInvestment={initialInvestment}
+          years={years}
+          startYear={new Date().getFullYear()}
+        />
+      )}
 
       <Button
         type="button"
