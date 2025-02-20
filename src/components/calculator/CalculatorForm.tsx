@@ -49,6 +49,8 @@ export const CalculatorForm = ({ onCalculationComplete }: CalculatorFormProps) =
     try {
       const calculationResult = calculateRetirement(values);
       onCalculationComplete(calculationResult);
+      // Save form data to localStorage
+      localStorage.setItem('retirementCalculatorData', JSON.stringify(values));
       toast(calculationResult.success ? "Success" : "Warning", {
         description: calculationResult.message,
       });

@@ -19,8 +19,11 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MonteCarloResults } from "./MonteCarloResults";
+import { calculateRetirement } from "@/utils/calculatorUtils";
+import { CalculatorFormValues } from "@/types/calculator";
+import { toast } from "sonner";
 
 const simulationFormSchema = z.object({
   planningType: z.string(),
@@ -43,14 +46,36 @@ export function MonteCarloForm() {
   const [activeTab, setActiveTab] = useState("starting-portfolio");
   const [showResults, setShowResults] = useState(false);
 
+  // Get retirement calculator data from localStorage if available
+  const getRetirementData = () => {
+    const savedData = localStorage.getItem('retirementCalculatorData');
+    if (savedData) {
+      try {
+        const parsedData: CalculatorFormValues = JSON.parse(savedData);
+        const calculationResult = calculateRetirement(parsedData);
+        return {
+          initialAmount: parsedData.currentPortfolioValue?.replace(/,/g, '') || "1000000",
+          yearsToRetirement: (67 - parseInt(parsedData.age)).toString() || "20",
+          annualReturn: parsedData.annualReturnOnInvestment || "7"
+        };
+      } catch (error) {
+        console.error('Error parsing retirement data:', error);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const retirementData = getRetirementData();
+
   const form = useForm<z.infer<typeof simulationFormSchema>>({
     resolver: zodResolver(simulationFormSchema),
     defaultValues: {
       planningType: "Multistage",
-      yearsToRetirement: "20",
+      yearsToRetirement: retirementData?.yearsToRetirement || "20",
       glidePath: "10",
       portfolioType: "Asset Classes",
-      initialAmount: "1000000",
+      initialAmount: retirementData?.initialAmount || "1000000",
       simulationPeriod: "30",
       taxTreatment: "Pre-tax Returns",
       simulationModel: "Historical Returns",
@@ -62,6 +87,14 @@ export function MonteCarloForm() {
       intervals: "Defaults",
     },
   });
+
+  useEffect(() => {
+    if (retirementData) {
+      toast.success("Retirement calculator data loaded successfully", {
+        description: "The simulation has been pre-filled with your retirement calculator data."
+      });
+    }
+  }, []);
 
   function onSubmit(values: z.infer<typeof simulationFormSchema>) {
     console.log(values);
