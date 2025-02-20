@@ -1,18 +1,10 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-interface MonteCarloResultsProps {
-  initialAmount: number;
-  yearsToRetirement: number;
-  simulationPeriod: number;
-  currentAge?: number;
-  selectedPortfolio?: {
-    usStocks: number;
-    usBonds: number;
-    cash: number;
-    intlStocks: number;
-    intlBonds: number;
-  };
-}
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { MonteCarloResultsProps } from "./types";
+import { generateSimulationData } from "./utils";
+import { portfolioAllocations } from "./constants";
+import { CustomTooltip } from "./CustomTooltip";
+import { PortfolioCard } from "./PortfolioCard";
 
 export function MonteCarloResults({ 
   initialAmount, 
@@ -21,123 +13,7 @@ export function MonteCarloResults({
   currentAge = 30,
   selectedPortfolio
 }: MonteCarloResultsProps) {
-  // Asset class definitions with updated returns and volatility
-  const assetClasses = {
-    usStocks: {
-      name: "U.S. Stocks (S&P 500)",
-      meanReturn: 0.095,  // 9.5% annualized return
-      volatility: 0.145   // 14.5% volatility
-    },
-    usBonds: {
-      name: "U.S. Bonds (Bloomberg Aggregate)",
-      meanReturn: 0.045,  // 4.5% annualized return
-      volatility: 0.04    // 4% volatility
-    },
-    cash: {
-      name: "Cash (3-month T-Bill)",
-      meanReturn: 0.025,  // 2.5% annualized return
-      volatility: 0.01    // 1% volatility
-    },
-    intlStocks: {
-      name: "International Stocks (MSCI EAFE)",
-      meanReturn: 0.06,   // 6% annualized return
-      volatility: 0.16    // 16% volatility
-    },
-    intlBonds: {
-      name: "International Bonds (Bloomberg Global ex-U.S.)",
-      meanReturn: 0.035,  // 3.5% annualized return
-      volatility: 0.06    // 6% volatility
-    }
-  };
-
-  // Portfolio allocations for different risk profiles
-  const portfolios = {
-    conservative: {
-      usStocks: 0.20,
-      usBonds: 0.40,
-      cash: 0.20,
-      intlStocks: 0.10,
-      intlBonds: 0.10
-    },
-    moderate: {
-      usStocks: 0.35,
-      usBonds: 0.25,
-      cash: 0.10,
-      intlStocks: 0.20,
-      intlBonds: 0.10
-    },
-    aggressive: {
-      usStocks: 0.45,
-      usBonds: 0.15,
-      cash: 0.05,
-      intlStocks: 0.30,
-      intlBonds: 0.05
-    },
-    ...(selectedPortfolio && { selected: selectedPortfolio })
-  };
-
-  // Generate sample data using Monte Carlo simulation
-  const generateSimulationData = () => {
-    const data = [];
-    const numSimulations = 1000;
-
-    // Helper function to generate random normal distribution
-    const generateNormalRandom = (mean: number, stdDev: number) => {
-      const u1 = Math.random();
-      const u2 = Math.random();
-      const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-      return mean + stdDev * z;
-    };
-
-    // Calculate portfolio return based on allocation
-    const calculatePortfolioReturn = (allocation: typeof portfolios.conservative) => {
-      let totalReturn = 0;
-      for (const [asset, weight] of Object.entries(allocation)) {
-        const assetClass = assetClasses[asset as keyof typeof assetClasses];
-        const assetReturn = generateNormalRandom(assetClass.meanReturn, assetClass.volatility);
-        totalReturn += assetReturn * weight;
-      }
-      return totalReturn;
-    };
-
-    for (let i = 0; i <= simulationPeriod; i++) {
-      const yearData: any = { 
-        year: i,
-        age: currentAge + i
-      };
-      
-      // Generate portfolio values for each risk profile
-      Object.entries(portfolios).forEach(([profile, allocation]) => {
-        let amount = initialAmount;
-        for (let y = 0; y < i; y++) {
-          const return_ = calculatePortfolioReturn(allocation);
-          amount *= (1 + return_);
-        }
-        yearData[profile] = Math.round(amount);
-      });
-      
-      data.push(yearData);
-    }
-    return data;
-  };
-
-  const data = generateSimulationData();
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-4 border rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900">Age: {label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm">
-              {entry.name}: ${entry.value.toLocaleString()}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
+  const data = generateSimulationData(initialAmount, simulationPeriod, currentAge, selectedPortfolio);
 
   return (
     <div className="mt-8 space-y-6">
@@ -229,47 +105,11 @@ export function MonteCarloResults({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-2">Conservative Portfolio</h3>
-          <ul className="text-sm text-gray-600 space-y-1">
-            <li>U.S. Stocks: 20%</li>
-            <li>U.S. Bonds: 40%</li>
-            <li>Cash: 20%</li>
-            <li>Int'l Stocks: 10%</li>
-            <li>Int'l Bonds: 10%</li>
-          </ul>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-2">Moderate Portfolio</h3>
-          <ul className="text-sm text-gray-600 space-y-1">
-            <li>U.S. Stocks: 35%</li>
-            <li>U.S. Bonds: 25%</li>
-            <li>Cash: 10%</li>
-            <li>Int'l Stocks: 20%</li>
-            <li>Int'l Bonds: 10%</li>
-          </ul>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-2">Aggressive Portfolio</h3>
-          <ul className="text-sm text-gray-600 space-y-1">
-            <li>U.S. Stocks: 45%</li>
-            <li>U.S. Bonds: 15%</li>
-            <li>Cash: 5%</li>
-            <li>Int'l Stocks: 30%</li>
-            <li>Int'l Bonds: 5%</li>
-          </ul>
-        </div>
+        <PortfolioCard title="Conservative Portfolio" portfolio={portfolioAllocations.conservative} />
+        <PortfolioCard title="Moderate Portfolio" portfolio={portfolioAllocations.moderate} />
+        <PortfolioCard title="Aggressive Portfolio" portfolio={portfolioAllocations.aggressive} />
         {selectedPortfolio && (
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-medium mb-2">Selected Portfolio</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>U.S. Stocks: {(selectedPortfolio.usStocks * 100).toFixed(0)}%</li>
-              <li>U.S. Bonds: {(selectedPortfolio.usBonds * 100).toFixed(0)}%</li>
-              <li>Cash: {(selectedPortfolio.cash * 100).toFixed(0)}%</li>
-              <li>Int'l Stocks: {(selectedPortfolio.intlStocks * 100).toFixed(0)}%</li>
-              <li>Int'l Bonds: {(selectedPortfolio.intlBonds * 100).toFixed(0)}%</li>
-            </ul>
-          </div>
+          <PortfolioCard title="Selected Portfolio" portfolio={selectedPortfolio} />
         )}
       </div>
     </div>
