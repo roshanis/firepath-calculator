@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 
@@ -34,6 +35,7 @@ const menuItems = [
 
 export function CalculatorSidebar() {
   const location = useLocation();
+  const { isMobile } = useSidebar();
 
   return (
     <>
@@ -51,16 +53,24 @@ export function CalculatorSidebar() {
       </Button>
 
       {/* Sidebar Content */}
-      <Sidebar>
+      <Sidebar variant={isMobile ? "floating" : "sidebar"}>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs sm:text-sm">Financial Planning</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-xs sm:text-sm pt-8 md:pt-0">Financial Planning</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {menuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild data-active={location.pathname === item.url}>
-                      <Link to={item.url} className="flex items-center gap-2 text-xs sm:text-sm">
+                      <Link 
+                        to={item.url} 
+                        className="flex items-center gap-2 text-xs sm:text-sm"
+                        onClick={() => {
+                          if (isMobile) {
+                            document.querySelector('[data-sidebar="trigger"]')?.click();
+                          }
+                        }}
+                      >
                         <item.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                         <span>{item.title}</span>
                       </Link>
