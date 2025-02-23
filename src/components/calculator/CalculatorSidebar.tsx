@@ -1,5 +1,5 @@
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Calculator, ArrowUpDown, Stethoscope } from "lucide-react";
 import {
   Sidebar,
@@ -31,6 +31,8 @@ const menuItems = [
 ];
 
 export function CalculatorSidebar() {
+  const location = useLocation();
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -40,7 +42,7 @@ export function CalculatorSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild data-active={location.pathname === item.url}>
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
