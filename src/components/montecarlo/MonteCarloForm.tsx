@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -50,6 +49,13 @@ export function MonteCarloForm() {
   const [activeTab, setActiveTab] = useState("starting-portfolio");
   const [showResults, setShowResults] = useState(false);
   const [showSpouseFields, setShowSpouseFields] = useState(false);
+  const [retirementData, setRetirementData] = useState<{
+    initialAmount: string;
+    yearsToRetirement: string;
+    annualReturn: string;
+    currentAge: number;
+    spousePortfolioValue: string;
+  } | null>(null);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio>({
     usStocks: 0.45,
     usBonds: 0.15,
@@ -59,38 +65,40 @@ export function MonteCarloForm() {
   });
   const [portfolioError, setPortfolioError] = useState<string | null>(null);
 
-  const getRetirementData = () => {
+  useEffect(() => {
     const savedData = localStorage.getItem('retirementCalculatorData');
     if (savedData) {
       try {
         const parsedData: CalculatorFormValues = JSON.parse(savedData);
         const calculationResult = calculateRetirement(parsedData);
         setShowSpouseFields(parsedData.maritalStatus === "married");
-        return {
+        
+        const data = {
           initialAmount: parsedData.currentPortfolioValue?.replace(/,/g, '') || "1000000",
           yearsToRetirement: (67 - parseInt(parsedData.age)).toString() || "20",
           annualReturn: parsedData.annualReturnOnInvestment || "7",
           currentAge: parseInt(parsedData.age),
           spousePortfolioValue: parsedData.spouseIncome || "0",
         };
+        
+        setRetirementData(data);
+        toast.success("Retirement calculator data loaded successfully", {
+          description: "The simulation has been pre-filled with your retirement calculator data."
+        });
       } catch (error) {
         console.error('Error parsing retirement data:', error);
-        return null;
       }
     }
-    return null;
-  };
-
-  const retirementData = getRetirementData();
+  }, []);
 
   const form = useForm<z.infer<typeof simulationFormSchema>>({
     resolver: zodResolver(simulationFormSchema),
     defaultValues: {
       planningType: "Multistage",
-      yearsToRetirement: retirementData?.yearsToRetirement || "20",
+      yearsToRetirement: "20",
       glidePath: "10",
       portfolioType: "Asset Classes",
-      initialAmount: retirementData?.initialAmount || "1000000",
+      initialAmount: "1000000",
       simulationPeriod: "30",
       taxTreatment: "Pre-tax Returns",
       simulationModel: "Historical Returns",
@@ -101,17 +109,20 @@ export function MonteCarloForm() {
       rebalancing: "Rebalance annually",
       intervals: "Defaults",
       spouseContribution: "0",
-      spousePortfolioValue: retirementData?.spousePortfolioValue || "0",
+      spousePortfolioValue: "0",
     },
   });
 
   useEffect(() => {
     if (retirementData) {
-      toast.success("Retirement calculator data loaded successfully", {
-        description: "The simulation has been pre-filled with your retirement calculator data."
+      form.reset({
+        ...form.getValues(),
+        yearsToRetirement: retirementData.yearsToRetirement,
+        initialAmount: retirementData.initialAmount,
+        spousePortfolioValue: retirementData.spousePortfolioValue,
       });
     }
-  }, []);
+  }, [retirementData, form]);
 
   const handlePortfolioChange = (asset: keyof Portfolio, value: string) => {
     const numValue = Number(value) / 100;
