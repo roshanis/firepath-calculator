@@ -37,14 +37,14 @@ export function CalculatorSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Financial Planning</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs sm:text-sm">Financial Planning</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild data-active={location.pathname === item.url}>
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-5 w-5" />
+                    <Link to={item.url} className="flex items-center gap-2 text-xs sm:text-sm">
+                      <item.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
