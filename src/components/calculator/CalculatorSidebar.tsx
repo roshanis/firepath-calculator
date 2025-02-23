@@ -35,7 +35,7 @@ const menuItems = [
 
 export function CalculatorSidebar() {
   const location = useLocation();
-  const { isMobile } = useSidebar();
+  const { isMobile, toggleSidebar } = useSidebar();
 
   return (
     <>
@@ -67,7 +67,7 @@ export function CalculatorSidebar() {
                         className="flex items-center gap-2 text-xs sm:text-sm"
                         onClick={() => {
                           if (isMobile) {
-                            document.querySelector('[data-sidebar="trigger"]')?.click();
+                            toggleSidebar();
                           }
                         }}
                       >
