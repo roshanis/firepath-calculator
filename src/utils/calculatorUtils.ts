@@ -21,12 +21,12 @@ const estimateSocialSecurity = (annualIncome: number): number => {
 
 export const calculateRetirement = (values: CalculatorFormValues): CalculationResult => {
   const currentAge = parseInt(values.age);
-  const income = parseFloat(values.currentAnnualIncome);
+  const income = parseFloat(parseCurrency(values.currentAnnualIncome));
   const annualSavings = income * 0.125; // Fixed 12.5% contribution rate
-  const hsaContribution = parseFloat(values.hsaContribution || "0");
+  const hsaContribution = parseFloat(parseCurrency(values.hsaContribution || "0"));
   const totalAnnualSavings = annualSavings + hsaContribution;
-  const annualExpenses = parseFloat(values.currentAnnualExpenses) || (income - totalAnnualSavings);
-  const currentPortfolio = parseFloat(values.currentPortfolioValue);
+  const annualExpenses = parseFloat(parseCurrency(values.currentAnnualExpenses)) || (income - totalAnnualSavings);
+  const currentPortfolio = parseFloat(parseCurrency(values.currentPortfolioValue));
   const annualReturn = parseFloat(values.annualReturnOnInvestment) / 100;
   const withdrawRate = parseFloat(values.withdrawalRate) / 100;
   
@@ -37,7 +37,7 @@ export const calculateRetirement = (values: CalculatorFormValues): CalculationRe
   let totalSS = primarySS;
   
   if (values.maritalStatus === "married" && values.spouseIncome) {
-    const spouseIncome = parseFloat(values.spouseIncome);
+    const spouseIncome = parseFloat(parseCurrency(values.spouseIncome));
     const spouseSS = estimateSocialSecurity(spouseIncome);
     totalSS = primarySS + spouseSS;
   }
@@ -57,7 +57,7 @@ export const calculateRetirement = (values: CalculatorFormValues): CalculationRe
   
   // Continue working and saving until age 67
   while (age < retirementAge) {
-    const yearlyContribution = currentIncome * 0.125; // 12.5% of current income
+    const yearlyContribution = (currentIncome * 0.125) + hsaContribution; // 12.5% of current income plus HSA
     yearlyBreakdown.push({
       age,
       portfolioValue: portfolio,
