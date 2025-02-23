@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -24,6 +25,7 @@ import { calculateRetirement } from "@/utils/calculatorUtils";
 import { CalculatorFormValues } from "@/types/calculator";
 import { Portfolio } from "./types";
 import { toast } from "sonner";
+import { UserPlus, DollarSign } from "lucide-react";
 
 const simulationFormSchema = z.object({
   planningType: z.string(),
@@ -40,11 +42,14 @@ const simulationFormSchema = z.object({
   inflationModel: z.string(),
   rebalancing: z.string(),
   intervals: z.string(),
+  spouseContribution: z.string().optional(),
+  spousePortfolioValue: z.string().optional(),
 });
 
 export function MonteCarloForm() {
   const [activeTab, setActiveTab] = useState("starting-portfolio");
   const [showResults, setShowResults] = useState(false);
+  const [showSpouseFields, setShowSpouseFields] = useState(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio>({
     usStocks: 0.45,
     usBonds: 0.15,
@@ -60,11 +65,13 @@ export function MonteCarloForm() {
       try {
         const parsedData: CalculatorFormValues = JSON.parse(savedData);
         const calculationResult = calculateRetirement(parsedData);
+        setShowSpouseFields(parsedData.maritalStatus === "married");
         return {
           initialAmount: parsedData.currentPortfolioValue?.replace(/,/g, '') || "1000000",
           yearsToRetirement: (67 - parseInt(parsedData.age)).toString() || "20",
           annualReturn: parsedData.annualReturnOnInvestment || "7",
-          currentAge: parseInt(parsedData.age)
+          currentAge: parseInt(parsedData.age),
+          spousePortfolioValue: parsedData.spouseIncome || "0",
         };
       } catch (error) {
         console.error('Error parsing retirement data:', error);
@@ -93,6 +100,8 @@ export function MonteCarloForm() {
       inflationModel: "Historical Inflation",
       rebalancing: "Rebalance annually",
       intervals: "Defaults",
+      spouseContribution: "0",
+      spousePortfolioValue: retirementData?.spousePortfolioValue || "0",
     },
   });
 
@@ -187,6 +196,64 @@ export function MonteCarloForm() {
                   )}
                 />
               ))}
+
+              {showSpouseFields && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="spouseContribution"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base flex items-center gap-2">
+                          <UserPlus className="h-4 w-4" />
+                          Spouse Annual Contribution ($)
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="text"
+                            className="text-sm sm:text-base"
+                            placeholder="0"
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/,/g, '');
+                              if (!isNaN(Number(value))) {
+                                field.onChange(Number(value).toLocaleString());
+                              }
+                            }}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="spousePortfolioValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Spouse Portfolio Value ($)
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="text"
+                            className="text-sm sm:text-base"
+                            placeholder="0"
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/,/g, '');
+                              if (!isNaN(Number(value))) {
+                                field.onChange(Number(value).toLocaleString());
+                              }
+                            }}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -305,7 +372,7 @@ export function MonteCarloForm() {
 
       {showResults && (
         <MonteCarloResults
-          initialAmount={Number(form.getValues("initialAmount"))}
+          initialAmount={Number(form.getValues("initialAmount").replace(/,/g, ''))}
           yearsToRetirement={Number(form.getValues("yearsToRetirement"))}
           simulationPeriod={Number(form.getValues("simulationPeriod"))}
           currentAge={retirementData?.currentAge || 30}
