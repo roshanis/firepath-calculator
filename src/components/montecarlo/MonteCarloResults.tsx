@@ -21,15 +21,15 @@ export function MonteCarloResults({
     <div className="mt-4 sm:mt-8 space-y-4 sm:space-y-6">
       <div className="bg-white p-3 sm:p-6 rounded-lg shadow">
         <h2 className="text-lg sm:text-xl font-semibold mb-4">Monte Carlo Simulation Results</h2>
-        <div className="h-[300px] sm:h-[500px]">
+        <div className="h-[300px] sm:h-[500px] -mx-2 sm:mx-0">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart 
               data={data}
               margin={{
                 top: 20,
-                right: isMobile ? 10 : 30,
+                right: isMobile ? 5 : 30,
                 left: isMobile ? 40 : 80,
-                bottom: isMobile ? 40 : 60
+                bottom: isMobile ? 60 : 60
               }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -38,7 +38,7 @@ export function MonteCarloResults({
                 label={{ 
                   value: 'Age', 
                   position: 'bottom', 
-                  offset: isMobile ? 20 : 40
+                  offset: isMobile ? 40 : 40
                 }}
                 tick={{ fontSize: isMobile ? 10 : 12 }}
                 tickMargin={isMobile ? 5 : 10}
@@ -57,9 +57,9 @@ export function MonteCarloResults({
               <Tooltip content={<CustomTooltip />} />
               <Legend 
                 verticalAlign="bottom"
-                height={isMobile ? 40 : 60}
+                height={isMobile ? 60 : 60}
                 wrapperStyle={{
-                  paddingTop: isMobile ? "10px" : "20px",
+                  paddingTop: isMobile ? "20px" : "20px",
                   bottom: 0,
                   fontSize: isMobile ? "10px" : "12px"
                 }}
