@@ -1,69 +1,48 @@
-# Welcome to your Lovable project
+# FirePath Calculator
 
-## Project info
+FirePath Calculator is a personal finance web app for modeling financial independence and early retirement scenarios. It provides a cleaner interface than a spreadsheet while still letting users explore the tradeoffs that drive time-to-FIRE outcomes.
 
-**URL**: https://lovable.dev/projects/2a009baf-3452-43dc-8bee-984e8a7bfdd1
+Demo: https://firepath-calculator.vercel.app
 
-## How can I edit this code?
+## What it does
 
-There are several ways of editing your application.
+- Models financial independence scenarios in a browser-based UI
+- Lets users adjust assumptions and compare outcomes quickly
+- Provides a public web experience built with React, Vite, Tailwind, and shadcn/ui
 
-**Use Lovable**
+## Local development
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2a009baf-3452-43dc-8bee-984e8a7bfdd1) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open the local Vite URL shown in the terminal.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Common commands
 
-**Use GitHub Codespaces**
+```bash
+npm run build
+npm run lint
+npm run preview
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Repository layout
 
-## What technologies are used for this project?
+- `src/`: React application code
+- `public/`: static assets
+- `package.json`: scripts and dependencies
+- `tailwind.config.ts`: Tailwind configuration
 
-This project is built with .
+## Product notes
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- This repo was originally scaffolded through Lovable, but the public README should describe the product, not the scaffold.
+- If you keep it active, the main README should stay focused on assumptions, outcomes, and the public demo.
 
-## How can I deploy this project?
+## Status
 
-Simply open [Lovable](https://lovable.dev/projects/2a009baf-3452-43dc-8bee-984e8a7bfdd1) and click on Share -> Publish.
+Current status: active frontend prototype with a live public demo.
 
-## I want to use a custom domain - is that possible?
+## License
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+MIT
